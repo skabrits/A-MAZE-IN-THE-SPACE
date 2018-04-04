@@ -133,7 +133,6 @@ public class StartPage extends AppCompatActivity {
         }
     }
     private void teleport(int[] cord) {
-        changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
         ImageView iMv = (ImageView) findViewById(R.id.Me);
         delView(iMv);
         prepareNEWlayout();
@@ -224,22 +223,74 @@ public class StartPage extends AppCompatActivity {
     private void river(int[] cord){
         switch (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]]) {
             case 11:{
-                go(cord, 1);
+                if (Maze.Maze[Maze.YourCordInMaze[0] - 2][Maze.YourCordInMaze[1]] > 10) {
+                    goFORriver(cord, 1);
+                } else {
+                    ImageView iMv = (ImageView) findViewById(R.id.Me);
+                    delView(iMv);
+                    prepareNEWlayout();
+                    goToThisLayout(layoutAmount);
+                    NativeLayout = CurrentLayout;
+                    CurBasicCord[0] = Maze.YourCordInMaze[0];
+                    CurBasicCord[1] = Maze.YourCordInMaze[1];
+                    Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+                    changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
+                    go(Maze.YourCordInMaze, 1);
+                }
                 //changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.riverup);
                 break;
             }
             case 12:{
-                go(cord, 10);
+                if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] + 2] > 10) {
+                    goFORriver(cord, 10);
+                } else {
+                    ImageView iMv = (ImageView) findViewById(R.id.Me);
+                    delView(iMv);
+                    prepareNEWlayout();
+                    goToThisLayout(layoutAmount);
+                    NativeLayout = CurrentLayout;
+                    CurBasicCord[0] = Maze.YourCordInMaze[0];
+                    CurBasicCord[1] = Maze.YourCordInMaze[1];
+                    Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+                    changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
+                    go(Maze.YourCordInMaze, 10);
+                }
                 //changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.riverleft);
                 break;
             }
             case 13:{
-                go(cord, 100);
+                if (Maze.Maze[Maze.YourCordInMaze[0] + 2][Maze.YourCordInMaze[1]] > 10) {
+                    goFORriver(cord, 100);
+                } else {
+                    ImageView iMv = (ImageView) findViewById(R.id.Me);
+                    delView(iMv);
+                    prepareNEWlayout();
+                    goToThisLayout(layoutAmount);
+                    NativeLayout = CurrentLayout;
+                    CurBasicCord[0] = Maze.YourCordInMaze[0];
+                    CurBasicCord[1] = Maze.YourCordInMaze[1];
+                    Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+                    changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
+                    go(Maze.YourCordInMaze, 100);
+                }
                 //changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.riverdown);
                 break;
             }
             case 14:{
-                go(cord, 1000);
+                if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] - 2] > 10) {
+                    goFORriver(cord, 1000);
+                } else {
+                    ImageView iMv = (ImageView) findViewById(R.id.Me);
+                    delView(iMv);
+                    prepareNEWlayout();
+                    goToThisLayout(layoutAmount);
+                    NativeLayout = CurrentLayout;
+                    CurBasicCord[0] = Maze.YourCordInMaze[0];
+                    CurBasicCord[1] = Maze.YourCordInMaze[1];
+                    Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+                    changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
+                    go(Maze.YourCordInMaze, 1000);
+                }
                 //changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.riverright);
                 break;
             }
@@ -377,6 +428,7 @@ public class StartPage extends AppCompatActivity {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
             river(Maze.YourCordInMaze);
         } else if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > TELEPORT) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
             teleport(Maze.YourCordInMaze);
         }
     }
