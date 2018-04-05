@@ -1,6 +1,8 @@
 package com.example.sevak.themaze;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
@@ -9,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,8 +30,8 @@ public class StartPage extends AppCompatActivity {
     public static final int TURN_LEFT = 4;
     public static final int TELEPORT = 100;
     private Integer layoutAmount = 1;
-    private Integer CurrentLayout = 1;
-    private Integer NativeLayout = 1;
+    private Integer CurrentLayout = 0;
+    private Integer NativeLayout = 0;
     private GestureDetector mDetector;
     private float ConvDPtoPX(float dp){
         DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
@@ -37,12 +40,26 @@ public class StartPage extends AppCompatActivity {
     private int[] zerocor = new int[2];
     private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
-
+    public static int vX, vY;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
+
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.Layout);
+
+        for (int i = 0; i < ((Maze.Maze.length-1)/2); i++) {
+            for (int j = 0; j < ((Maze.Maze[1].length-1)/2); j++) {
+                ImageView imageView = new ImageView(this);
+                imageView.setImageResource(R.drawable.walls0);
+                RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                rules.setMargins(400+140*j, 400+140*i, 0, 0);
+                layout.addView(imageView, rules);
+            }
+        }
 
         Maze.init();
         ImageView c1 = (ImageView) findViewById(R.id.C1);
@@ -53,6 +70,39 @@ public class StartPage extends AppCompatActivity {
         CurBasicCord[0] = MazeHolder.BasicCordinats[0];
         CurBasicCord[1] = MazeHolder.BasicCordinats[1];
         changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+
+
+        findViewById(R.id.p1l).setTag("Rl" + layoutAmount.toString());
+        myDragEventListener mDragListen = new myDragEventListener();
+        findViewById(R.id.p1l).setOnDragListener(mDragListen);
+
+
+        findViewById(R.id.p1l).setOnLongClickListener(new View.OnLongClickListener() {
+
+            public boolean onLongClick(View v) {
+
+                ClipData.Item item = new ClipData.Item((Intent) v.getTag());
+
+                // Create a new ClipData using the tag as a label, the plain text MIME type, and
+                // the already-created item. This will create a new ClipDescription object within the
+                // ClipData, and set its MIME type entry to "text/plain"
+                ClipData dragData = new ClipData((CharSequence) v.getTag(),
+                        new String[]{ ClipDescription.MIMETYPE_TEXT_PLAIN }, item);
+
+                // Instantiates the drag shadow builder.
+                View.DragShadowBuilder myShadow = new MyDragShadowBuilder(findViewById(R.id.p1l));
+
+                // Starts the drag
+
+                v.startDrag(dragData,  // the data to be dragged
+                        myShadow,  // the drag shadow builder
+                        null,      // no need to use local data
+                        0          // flags (not currently used, set to 0)
+                );
+                return true;
+            }
+        });
+
 
         RelativeLayout touch = (RelativeLayout) findViewById(R.id.p1l);
         mDetector = new GestureDetector(this, new MyGestureListener());
@@ -80,7 +130,7 @@ public class StartPage extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), Game.class));
+                goToThisLayout(0);
             }
         });
 //        ImageButton Return = (ImageButton) findViewById(R.id.Return1);
@@ -136,7 +186,7 @@ public class StartPage extends AppCompatActivity {
         ImageView iMv = (ImageView) findViewById(R.id.Me);
         delView(iMv);
         prepareNEWlayout();
-        goToThisLayout(layoutAmount);
+        setLayoutAScurrent(layoutAmount);
         NativeLayout = CurrentLayout;
         int teleport_number = Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]];
         int[] teleportCoord = Maze.Teleports.get(teleport_number+1);
@@ -154,6 +204,16 @@ public class StartPage extends AppCompatActivity {
         changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
     }
 
+    private void setLayoutAScurrent(final Integer ln){
+        Button button = (Button) findViewById(R.id.SP1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToThisLayout(ln);
+            }
+        });
+    }
+
     private void prepareNEWlayout() {
         int[][] YourMaze = new int[Maze.YourMaze.length][Maze.YourMaze[1].length];
         for (int i = 0; i < YourMaze.length; i++) {
@@ -163,34 +223,45 @@ public class StartPage extends AppCompatActivity {
         }
         layoutAmount += 1;
         Maze.YourMazesholder.put(layoutAmount, YourMaze);
-        LinearLayout layout = (LinearLayout) findViewById(R.id.MenuBar);
-        Button button = new Button(this);
-        String idStr = "p" + layoutAmount.toString();
-        button.setText("PAGE " + layoutAmount);
-        final Integer lm = layoutAmount;
-        button.setOnClickListener(new View.OnClickListener() {
+
+        ConstraintLayout tlayoutbd = (ConstraintLayout) findViewById(R.id.Container);
+        RelativeLayout Rlc = new RelativeLayout(this);
+        Rlc.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorLightGreen));
+        String idStr1c = "p" + layoutAmount.toString() + "l";
+        Rlc.setId(getResources().getIdentifier(idStr1c, "id", getPackageName()));
+        Rlc.setClickable(true);
+        ConstraintLayout.LayoutParams rules1c = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.MATCH_PARENT,
+                ConstraintLayout.LayoutParams.MATCH_PARENT);
+        Rlc.setMinimumHeight((int) ConvDPtoPX(500));
+        Rlc.setMinimumWidth((int) ConvDPtoPX(387));
+        Rlc.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view) {
-                 goToThisLayout(lm);
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                mDetector.onTouchEvent(motionEvent);
+                return true;
             }
         });
-        button.setId(getResources().getIdentifier(idStr, "id", getPackageName()));
-        LinearLayout.LayoutParams rules = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        layout.addView(button, rules);
+        tlayoutbd.addView(Rlc, rules1c);
 
-        ConstraintLayout layoutbd = (ConstraintLayout) findViewById(R.id.Container);
-        RelativeLayout Rl = new RelativeLayout(this);
-        Rl.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorLightGreen));
+        ImageView imageViewc = new ImageView(this);
+        imageViewc.setImageResource(R.drawable.walls0);
+        RelativeLayout.LayoutParams rules2c = new RelativeLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        rules2c.setMargins((int) zerocor[1], (int) zerocor[0], 0, 0);
+        Rlc.addView(imageViewc, rules2c);
+        goToThisLayout(CurrentLayout);
+
+        RelativeLayout layoutbd = (RelativeLayout) findViewById(R.id.p0l);
+        final RelativeLayout Rl = new RelativeLayout(this);
+        Rl.getBackground().setAlpha(0);
         String idStr1 = "p" + layoutAmount.toString() + "l";
-        Rl.setId(getResources().getIdentifier(idStr1, "id", getPackageName()));
         Rl.setClickable(true);
         ConstraintLayout.LayoutParams rules1 = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.MATCH_PARENT);
-        Rl.setMinimumHeight((int) ConvDPtoPX(500));
-        Rl.setMinimumWidth((int) ConvDPtoPX(387));
+        rules1.setMargins(CELLSIZE * 2 * Maze.Maze[0].length, CELLSIZE * 2 * Maze.Maze[0].length * (1 + layoutAmount), 0, 0);
         Rl.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -198,6 +269,43 @@ public class StartPage extends AppCompatActivity {
                 return true;
             }
         });
+        Rl.setTag(idStr1);
+        myDragEventListener mDragListen = new myDragEventListener();
+        Rl.setOnDragListener(mDragListen);
+
+
+        Rl.setOnLongClickListener(new View.OnLongClickListener() {
+
+            public boolean onLongClick(View v) {
+
+                ClipData.Item item = new ClipData.Item((Intent) v.getTag());
+
+                // Create a new ClipData using the tag as a label, the plain text MIME type, and
+                // the already-created item. This will create a new ClipDescription object within the
+                // ClipData, and set its MIME type entry to "text/plain"
+                ClipData dragData = new ClipData((CharSequence) v.getTag(),
+                        new String[]{ ClipDescription.MIMETYPE_TEXT_PLAIN }, item);
+
+                // Instantiates the drag shadow builder.
+                View.DragShadowBuilder myShadow = new MyDragShadowBuilder(Rl);
+
+                // Starts the drag
+
+                v.startDrag(dragData,  // the data to be dragged
+                        myShadow,  // the drag shadow builder
+                        null,      // no need to use local data
+                        0          // flags (not currently used, set to 0)
+                );
+
+                if ((findViewById(R.id.Trash_Can).getX() <= vX) && (findViewById(R.id.Trash_Can).getY() <= vY) && ((findViewById(R.id.Trash_Can).getX() + findViewById(R.id.Trash_Can).getWidth()) >= vX) && ((findViewById(R.id.Trash_Can).getY() + findViewById(R.id.Trash_Can).getHeight()) >= vY)){
+                    deleteLayout(v.getTag().toString());
+                }
+
+                return true;
+            }
+        });
+
+
         layoutbd.addView(Rl, rules1);
 
         ImageView imageView = new ImageView(this);
@@ -207,7 +315,13 @@ public class StartPage extends AppCompatActivity {
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
         rules2.setMargins((int) zerocor[1], (int) zerocor[0], 0, 0);
         Rl.addView(imageView, rules2);
-        goToThisLayout(CurrentLayout);
+    }
+
+    private void deleteLayout(String res) {
+        ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
+        l.removeView(findViewById(getResources().getIdentifier(res, "id", getPackageName())));
+        RelativeLayout l1 = (RelativeLayout) findViewById(R.id.p0l);
+        l1.removeView(findViewById(getResources().getIdentifier(res, "tag", getPackageName())));
     }
 
     private void goToThisLayout(Integer LayoutNumber) {
@@ -229,7 +343,7 @@ public class StartPage extends AppCompatActivity {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
                     prepareNEWlayout();
-                    goToThisLayout(layoutAmount);
+                    setLayoutAScurrent(layoutAmount);
                     NativeLayout = CurrentLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
@@ -247,7 +361,7 @@ public class StartPage extends AppCompatActivity {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
                     prepareNEWlayout();
-                    goToThisLayout(layoutAmount);
+                    setLayoutAScurrent(layoutAmount);
                     NativeLayout = CurrentLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
@@ -265,7 +379,7 @@ public class StartPage extends AppCompatActivity {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
                     prepareNEWlayout();
-                    goToThisLayout(layoutAmount);
+                    setLayoutAScurrent(layoutAmount);
                     NativeLayout = CurrentLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
@@ -283,7 +397,7 @@ public class StartPage extends AppCompatActivity {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
                     prepareNEWlayout();
-                    goToThisLayout(layoutAmount);
+                    setLayoutAScurrent(layoutAmount);
                     NativeLayout = CurrentLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
