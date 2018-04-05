@@ -47,7 +47,7 @@ public class StartPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
 
-        RelativeLayout layout = (RelativeLayout) findViewById(R.id.Layout);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
 
         for (int i = 0; i < ((Maze.Maze.length-1)/2); i++) {
             for (int j = 0; j < ((Maze.Maze[1].length-1)/2); j++) {
