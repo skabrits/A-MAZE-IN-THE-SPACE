@@ -1,6 +1,7 @@
 package com.example.sevak.themaze;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
@@ -15,11 +16,15 @@ import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 public class StartPage extends AppCompatActivity {
     public static final int CELLSIZE = 140;
@@ -29,9 +34,14 @@ public class StartPage extends AppCompatActivity {
     public static final int TURN_DOWN = 3;
     public static final int TURN_LEFT = 4;
     public static final int TELEPORT = 100;
+    public static final int OFFSET_LEFT = 400;
+    public static final int OFFSET_TOP = 400;
+    public static final int OFFSET_BETWEEN = 10;
     private Integer layoutAmount = 1;
-    private Integer CurrentLayout = 0;
-    private Integer NativeLayout = 0;
+    private Integer CurrentLayout = 1;
+    private Integer NativeLayout = 1;
+    private Integer ThisLayout = 0;
+
     private GestureDetector mDetector;
     private float ConvDPtoPX(float dp){
         DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
@@ -41,11 +51,18 @@ public class StartPage extends AppCompatActivity {
     private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
     public static int vX, vY;
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
+
+        Maze.init();
+        ImageView c1 = (ImageView) findViewById(R.id.C1);
+        zerocor[0]=(int) ConvDPtoPX(150);
+        zerocor[1]=(int) ConvDPtoPX(180);
+        CurBasicCord[0] = MazeHolder.BasicCordinats[0];
+        CurBasicCord[1] = MazeHolder.BasicCordinats[1];
+        changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
 
@@ -56,53 +73,22 @@ public class StartPage extends AppCompatActivity {
                 RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                         ConstraintLayout.LayoutParams.WRAP_CONTENT);
-                rules.setMargins(400+140*j, 400+140*i, 0, 0);
+                rules.setMargins(OFFSET_LEFT +CELLSIZE*j, OFFSET_TOP +CELLSIZE*i, 0, 0);
                 layout.addView(imageView, rules);
             }
         }
 
-        Maze.init();
-        ImageView c1 = (ImageView) findViewById(R.id.C1);
-        zerocor[0]=(int) ConvDPtoPX(150);
-        zerocor[1]=(int) ConvDPtoPX(180);
-        Laycor[0]=(int) ConvDPtoPX(1000);
-        Laycor[1]=(int) ConvDPtoPX(500);
-        CurBasicCord[0] = MazeHolder.BasicCordinats[0];
-        CurBasicCord[1] = MazeHolder.BasicCordinats[1];
-        changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+        layout.findViewWithTag("p1l").getBackground().setAlpha(0);
+        ViewGroup.MarginLayoutParams trules1 = (ViewGroup.MarginLayoutParams) layout.findViewWithTag("p1l").getLayoutParams();
+        trules1.setMargins(OFFSET_LEFT - CELLSIZE, (int) (OFFSET_TOP + CELLSIZE * Maze.SIZE_Y + OFFSET_BETWEEN), 0, 0);
+        layout.findViewWithTag("p1l").requestLayout();
+        layout.getBackground().setAlpha(255);
 
-
-        findViewById(R.id.p1l).setTag("Rl" + layoutAmount.toString());
-        myDragEventListener mDragListen = new myDragEventListener();
-        findViewById(R.id.p1l).setOnDragListener(mDragListen);
-
-
-        findViewById(R.id.p1l).setOnLongClickListener(new View.OnLongClickListener() {
-
-            public boolean onLongClick(View v) {
-
-                ClipData.Item item = new ClipData.Item((Intent) v.getTag());
-
-                // Create a new ClipData using the tag as a label, the plain text MIME type, and
-                // the already-created item. This will create a new ClipDescription object within the
-                // ClipData, and set its MIME type entry to "text/plain"
-                ClipData dragData = new ClipData((CharSequence) v.getTag(),
-                        new String[]{ ClipDescription.MIMETYPE_TEXT_PLAIN }, item);
-
-                // Instantiates the drag shadow builder.
-                View.DragShadowBuilder myShadow = new MyDragShadowBuilder(findViewById(R.id.p1l));
-
-                // Starts the drag
-
-                v.startDrag(dragData,  // the data to be dragged
-                        myShadow,  // the drag shadow builder
-                        null,      // no need to use local data
-                        0          // flags (not currently used, set to 0)
-                );
-                return true;
-            }
-        });
-
+        RelativeLayout relativeLayout = (RelativeLayout) layout.findViewWithTag("p1l");
+        ImageView imageView = (ImageView) relativeLayout.findViewWithTag("C1");
+        ViewGroup.MarginLayoutParams trules1c = (ViewGroup.MarginLayoutParams) imageView.getLayoutParams();
+        trules1c.setMargins((Maze.SIZE_X - 1) * CELLSIZE, (Maze.SIZE_Y - 1) * CELLSIZE, 0, 0);
+        imageView.requestLayout();
 
         RelativeLayout touch = (RelativeLayout) findViewById(R.id.p1l);
         mDetector = new GestureDetector(this, new MyGestureListener());
@@ -133,13 +119,6 @@ public class StartPage extends AppCompatActivity {
                 goToThisLayout(0);
             }
         });
-//        ImageButton Return = (ImageButton) findViewById(R.id.Return1);
-//        Return.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//            }
-//        });
     }
 
     @Override
@@ -185,9 +164,14 @@ public class StartPage extends AppCompatActivity {
     private void teleport(int[] cord) {
         ImageView iMv = (ImageView) findViewById(R.id.Me);
         delView(iMv);
+        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+        delTagView(iMvc);
         prepareNEWlayout();
         setLayoutAScurrent(layoutAmount);
+        CurrentLayout = layoutAmount;
         NativeLayout = CurrentLayout;
+        goToThisLayout(layoutAmount);
+        ThisLayout = NativeLayout;
         int teleport_number = Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]];
         int[] teleportCoord = Maze.Teleports.get(teleport_number+1);
         if (teleportCoord == null)
@@ -224,17 +208,15 @@ public class StartPage extends AppCompatActivity {
         layoutAmount += 1;
         Maze.YourMazesholder.put(layoutAmount, YourMaze);
 
-        ConstraintLayout tlayoutbd = (ConstraintLayout) findViewById(R.id.Container);
+        ConstraintLayout container = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout Rlc = new RelativeLayout(this);
         Rlc.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorLightGreen));
         String idStr1c = "p" + layoutAmount.toString() + "l";
         Rlc.setId(getResources().getIdentifier(idStr1c, "id", getPackageName()));
         Rlc.setClickable(true);
         ConstraintLayout.LayoutParams rules1c = new ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.MATCH_PARENT,
-                ConstraintLayout.LayoutParams.MATCH_PARENT);
-        Rlc.setMinimumHeight((int) ConvDPtoPX(500));
-        Rlc.setMinimumWidth((int) ConvDPtoPX(387));
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
         Rlc.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -242,96 +224,65 @@ public class StartPage extends AppCompatActivity {
                 return true;
             }
         });
-        tlayoutbd.addView(Rlc, rules1c);
+        Rlc.setMinimumHeight((int) ConvDPtoPX(443));
+        Rlc.setMinimumWidth((int) ConvDPtoPX(368));
+        container.addView(Rlc, rules1c);
 
         ImageView imageViewc = new ImageView(this);
         imageViewc.setImageResource(R.drawable.walls0);
         RelativeLayout.LayoutParams rules2c = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules2c.setMargins((int) zerocor[1], (int) zerocor[0], 0, 0);
+        rules2c.setMargins((int) zerocor[1], (int) zerocor[0], 100, 100);
         Rlc.addView(imageViewc, rules2c);
-        goToThisLayout(CurrentLayout);
 
         RelativeLayout layoutbd = (RelativeLayout) findViewById(R.id.p0l);
         final RelativeLayout Rl = new RelativeLayout(this);
-        Rl.getBackground().setAlpha(0);
+        //Rl.getBackground().setAlpha(0);
         String idStr1 = "p" + layoutAmount.toString() + "l";
         Rl.setClickable(true);
         ConstraintLayout.LayoutParams rules1 = new ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.MATCH_PARENT,
-                ConstraintLayout.LayoutParams.MATCH_PARENT);
-        rules1.setMargins(CELLSIZE * 2 * Maze.Maze[0].length, CELLSIZE * 2 * Maze.Maze[0].length * (1 + layoutAmount), 0, 0);
-        Rl.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                mDetector.onTouchEvent(motionEvent);
-                return true;
-            }
-        });
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        rules1.setMargins(OFFSET_LEFT - CELLSIZE, (int) (OFFSET_TOP + (layoutAmount + 1) * (CELLSIZE * Maze.SIZE_Y + OFFSET_BETWEEN)),
+                0, 100);
+
         Rl.setTag(idStr1);
-        myDragEventListener mDragListen = new myDragEventListener();
-        Rl.setOnDragListener(mDragListen);
 
-
-        Rl.setOnLongClickListener(new View.OnLongClickListener() {
-
-            public boolean onLongClick(View v) {
-
-                ClipData.Item item = new ClipData.Item((Intent) v.getTag());
-
-                // Create a new ClipData using the tag as a label, the plain text MIME type, and
-                // the already-created item. This will create a new ClipDescription object within the
-                // ClipData, and set its MIME type entry to "text/plain"
-                ClipData dragData = new ClipData((CharSequence) v.getTag(),
-                        new String[]{ ClipDescription.MIMETYPE_TEXT_PLAIN }, item);
-
-                // Instantiates the drag shadow builder.
-                View.DragShadowBuilder myShadow = new MyDragShadowBuilder(Rl);
-
-                // Starts the drag
-
-                v.startDrag(dragData,  // the data to be dragged
-                        myShadow,  // the drag shadow builder
-                        null,      // no need to use local data
-                        0          // flags (not currently used, set to 0)
-                );
-
-                if ((findViewById(R.id.Trash_Can).getX() <= vX) && (findViewById(R.id.Trash_Can).getY() <= vY) && ((findViewById(R.id.Trash_Can).getX() + findViewById(R.id.Trash_Can).getWidth()) >= vX) && ((findViewById(R.id.Trash_Can).getY() + findViewById(R.id.Trash_Can).getHeight()) >= vY)){
-                    deleteLayout(v.getTag().toString());
-                }
-
-                return true;
-            }
-        });
 
 
         layoutbd.addView(Rl, rules1);
 
         ImageView imageView = new ImageView(this);
+        imageView.setTag("C"+layoutAmount);
         imageView.setImageResource(R.drawable.walls0);
         RelativeLayout.LayoutParams rules2 = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules2.setMargins((int) zerocor[1], (int) zerocor[0], 0, 0);
+        rules2.setMargins(CELLSIZE * (Maze.SIZE_X - 1), CELLSIZE * (Maze.SIZE_Y -1), 0, 100);
         Rl.addView(imageView, rules2);
+        ImageView me = new ImageView(this);
+        me.setId(R.id.Mec);
+        me.setImageResource(R.drawable.milkiipidoras);
+        Rl.addView(me, rules2);
     }
 
     private void deleteLayout(String res) {
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         l.removeView(findViewById(getResources().getIdentifier(res, "id", getPackageName())));
         RelativeLayout l1 = (RelativeLayout) findViewById(R.id.p0l);
-        l1.removeView(findViewById(getResources().getIdentifier(res, "tag", getPackageName())));
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
+        layout.removeView(layout.findViewWithTag(res));
     }
 
     private void goToThisLayout(Integer LayoutNumber) {
-        String tid = "p" + CurrentLayout.toString() + "l";
+        String tid = "p" + ThisLayout.toString() + "l";
         String cid = "p" + LayoutNumber.toString() + "l";
         RelativeLayout thisL = (RelativeLayout) findViewById(getResources().getIdentifier(tid, "id", getPackageName()));
         RelativeLayout changeL = (RelativeLayout) findViewById(getResources().getIdentifier(cid, "id", getPackageName()));
         thisL.setVisibility(View.GONE);
         changeL.setVisibility(View.VISIBLE);
-        CurrentLayout = LayoutNumber;
+        ThisLayout = LayoutNumber;
     }
 
     private void river(int[] cord){
@@ -342,9 +293,14 @@ public class StartPage extends AppCompatActivity {
                 } else {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
+                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+                    delTagView(iMvc);
                     prepareNEWlayout();
                     setLayoutAScurrent(layoutAmount);
+                    CurrentLayout = layoutAmount;
                     NativeLayout = CurrentLayout;
+                    goToThisLayout(layoutAmount);
+                    ThisLayout = NativeLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -360,9 +316,14 @@ public class StartPage extends AppCompatActivity {
                 } else {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
+                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+                    delTagView(iMvc);
                     prepareNEWlayout();
                     setLayoutAScurrent(layoutAmount);
+                    CurrentLayout = layoutAmount;
                     NativeLayout = CurrentLayout;
+                    goToThisLayout(layoutAmount);
+                    ThisLayout = NativeLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -378,9 +339,14 @@ public class StartPage extends AppCompatActivity {
                 } else {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
+                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+                    delTagView(iMvc);
                     prepareNEWlayout();
                     setLayoutAScurrent(layoutAmount);
+                    CurrentLayout = layoutAmount;
                     NativeLayout = CurrentLayout;
+                    goToThisLayout(layoutAmount);
+                    ThisLayout = NativeLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -396,9 +362,14 @@ public class StartPage extends AppCompatActivity {
                 } else {
                     ImageView iMv = (ImageView) findViewById(R.id.Me);
                     delView(iMv);
+                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+                    delTagView(iMvc);
                     prepareNEWlayout();
                     setLayoutAScurrent(layoutAmount);
+                    CurrentLayout = layoutAmount;
                     NativeLayout = CurrentLayout;
+                    goToThisLayout(layoutAmount);
+                    ThisLayout = NativeLayout;
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -427,6 +398,9 @@ public class StartPage extends AppCompatActivity {
                 ImageView iv = (ImageView) findViewById(R.id.Me);
                 delView(iv);
                 changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+                ImageView ivc = (ImageView) findViewById(R.id.Mec);
+                delTagView(ivc);
+                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
                 checkTheRvrORtp();
                 break;
             }
@@ -444,6 +418,9 @@ public class StartPage extends AppCompatActivity {
                 ImageView iv = (ImageView) findViewById(R.id.Me);
                 delView(iv);
                 changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+                ImageView ivc = (ImageView) findViewById(R.id.Mec);
+                delTagView(ivc);
+                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
                 checkTheRvrORtp();
                 break;
             }
@@ -461,6 +438,9 @@ public class StartPage extends AppCompatActivity {
                 ImageView iv = (ImageView) findViewById(R.id.Me);
                 delView(iv);
                 changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+                ImageView ivc = (ImageView) findViewById(R.id.Mec);
+                delTagView(ivc);
+                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
                 checkTheRvrORtp();
                 break;
             }
@@ -478,6 +458,9 @@ public class StartPage extends AppCompatActivity {
                 ImageView iv = (ImageView) findViewById(R.id.Me);
                 delView(iv);
                 changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+                ImageView ivc = (ImageView) findViewById(R.id.Mec);
+                delTagView(ivc);
+                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
                 checkTheRvrORtp();
                 break;
             }
@@ -510,7 +493,8 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void finishgame(){
-
+        Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
+        t.show();
     }
     private void noact(int[] cord, int side){
 
@@ -555,10 +539,39 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
-    private void delView(View view){
-        RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l", "id", getPackageName()));
+    private void delTagView(View view){
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l).findViewWithTag("p"+NativeLayout.toString()+"l");
         layout.removeView(view);
     }
+
+    private void delView(View view){
+        RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l",
+                "id", getPackageName()));
+        layout.removeView(view);
+    }
+
+    private void changeTagIdCell(int[] cord, int cellType) {
+        RelativeLayout subLayoutInGlobal = (RelativeLayout) findViewById(R.id.p0l).findViewWithTag("p"+NativeLayout.toString()+"l");
+        ImageView imageViewc = new ImageView(this);
+        imageViewc.setId(R.id.Mec);
+        imageViewc.setImageResource(cellType);
+        RelativeLayout.LayoutParams rulesc = new RelativeLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        ImageView v = subLayoutInGlobal.findViewWithTag("C"+NativeLayout);
+        int x = (int) v.getX();
+        int y = (int) v.getY();
+        if (x==0 && y==0) {
+            x = (Maze.SIZE_X - 1) * CELLSIZE;
+            y = (Maze.SIZE_Y - 1) * CELLSIZE;
+        }
+        rulesc.setMargins(
+                (int) (x - (CurBasicCord[1] - cord[1]) * CELLSIZE/2),
+                (int) (y - (CurBasicCord[0] - cord[0]) * CELLSIZE/2),
+                0, 100);
+        subLayoutInGlobal.addView(imageViewc, rulesc);
+    }
+
     private void changeIdCell(int[] cord, int cellType, int ident) {
         RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l", "id", getPackageName()));
         ImageView imageView = new ImageView(this);
@@ -577,11 +590,33 @@ public class StartPage extends AppCompatActivity {
         RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * CELLSIZE/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * CELLSIZE/2, 0, 0);
+        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * CELLSIZE/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * CELLSIZE/2, 1000, 1000);
         layout.addView(imageView, rules);
         ImageView iv = (ImageView) findViewById(R.id.Me);
         delView(iv);
         changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+
+        RelativeLayout subLayoutInGlobal = (RelativeLayout) findViewById(R.id.p0l).findViewWithTag("p"+NativeLayout.toString()+"l");
+        ImageView imageViewc = new ImageView(this);
+        imageViewc.setImageResource(cellType);
+        RelativeLayout.LayoutParams rulesc = new RelativeLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        ImageView v = subLayoutInGlobal.findViewWithTag("C"+NativeLayout);
+        int x = (int) v.getX();
+        int y = (int) v.getY();
+        if (x==0 && y==0) {
+            x = (Maze.SIZE_X - 1) * CELLSIZE;
+            y = (Maze.SIZE_Y - 1) * CELLSIZE;
+        }
+        rulesc.setMargins(
+                (int) (x - (CurBasicCord[1] - cord[1]) * CELLSIZE/2),
+                (int) (y - (CurBasicCord[0] - cord[0]) * CELLSIZE/2),
+                100, 100);
+        subLayoutInGlobal.addView(imageViewc, rulesc);
+        ImageView ivc = (ImageView) findViewById(R.id.Mec);
+        delTagView(ivc);
+        changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
     }
     private void turn(int side) {
         switch (side) {

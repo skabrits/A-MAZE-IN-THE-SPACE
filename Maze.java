@@ -11,9 +11,12 @@ import static com.example.sevak.themaze.StartPage.TELEPORT;
 
 public class Maze {
     public static int[][] Maze = MazeHolder.Maze;
+    public static int SIZE_X = (Maze[0].length - 1)/2;
+    public static int SIZE_Y = (Maze.length - 1)/2;
+
     public static int[] YourCordInMaze = new int[2];
 
-    public static int[][] YourMaze = new int[Maze.length][Maze[1].length];
+    public static int[][] YourMaze = new int[Maze.length][Maze[0].length];
     public static Map<Integer,int[]> Teleports = new HashMap<Integer, int[]>();
     public static Map<Integer,int[][]> YourMazesholder = new HashMap<Integer, int[][]>();
     public static void  init() {

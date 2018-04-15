@@ -17,4 +17,5 @@ public class MazeHolder {
     };
     public static int[] BasicCordinats = {1,1};
     // для стенок 1=up, 10=right, 100=down, 1000=left
+
 }
