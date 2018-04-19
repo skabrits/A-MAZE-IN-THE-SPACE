@@ -11,6 +11,7 @@ import android.support.constraint.ConstraintSet;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.Touch;
 import android.util.DisplayMetrics;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -66,6 +67,74 @@ public class StartPage extends AppCompatActivity {
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
 
+        layout.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent dragEvent) {
+                ImageView iv = (ImageView) findViewById(R.id.Trash_Can);
+                View view1 = (View) dragEvent.getLocalState();
+                switch (dragEvent.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        // do nothing
+                        break;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        break;
+                    case DragEvent.ACTION_DROP:
+                        if ((dragEvent.getX() >= iv.getX()) && (dragEvent.getX() <= (iv.getX() + iv.getWidth())) && (dragEvent.getY() >= iv.getY()) && (dragEvent.getY() <= (iv.getY() + iv.getHeight()))) {
+                            if (!view1.getTag().equals ("p"+NativeLayout+"l")) {
+                                deleteLayout((String) view1.getTag());
+                            }
+                        } else if ((dragEvent.getX() >= OFFSET_LEFT) && (dragEvent.getX() <= (OFFSET_LEFT + Maze.SIZE_X*CELLSIZE)) && (dragEvent.getY() >= OFFSET_TOP) && (dragEvent.getY() <= (OFFSET_TOP + Maze.SIZE_Y*CELLSIZE))) {
+                            view1.bringToFront();
+                            view1.animate()
+                                    .x(((int)(dragEvent.getX() - OFFSET_LEFT) / CELLSIZE)*CELLSIZE + OFFSET_LEFT - (Maze.SIZE_X - 1) * CELLSIZE)
+                                    .y(((int)(dragEvent.getY() - OFFSET_TOP) / CELLSIZE)*CELLSIZE + OFFSET_TOP - (Maze.SIZE_Y - 1) * CELLSIZE)
+                                    .setDuration(700)
+                                    .start();
+                        } else {
+                            view1.animate()
+                                    .x(dragEvent.getX() - (Maze.SIZE_X - 1) * CELLSIZE)
+                                    .y(dragEvent.getY() - (Maze.SIZE_Y - 1) * CELLSIZE)
+                                    .setDuration(700)
+                                    .start();
+                        }
+                        view1.setVisibility(View.VISIBLE);
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+        ConstraintLayout layoutbd = (ConstraintLayout) findViewById(R.id.bigDaddy);
+
+        layoutbd.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent dragEvent) {
+                switch (dragEvent.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        // do nothing
+                        break;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        break;
+                    case DragEvent.ACTION_DROP:
+                        // Dropped, reassign View to ViewGroup
+                        View view1 = (View) dragEvent.getLocalState();
+                        view1.setVisibility(View.VISIBLE);
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+
+
         for (int i = 0; i < ((Maze.Maze.length-1)/2); i++) {
             for (int j = 0; j < ((Maze.Maze[1].length-1)/2); j++) {
                 ImageView imageView = new ImageView(this);
@@ -73,6 +142,7 @@ public class StartPage extends AppCompatActivity {
                 RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                         ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                imageView.setAlpha(50);
                 rules.setMargins(OFFSET_LEFT +CELLSIZE*j, OFFSET_TOP +CELLSIZE*i, 0, 0);
                 layout.addView(imageView, rules);
             }
@@ -82,9 +152,25 @@ public class StartPage extends AppCompatActivity {
         ViewGroup.MarginLayoutParams trules1 = (ViewGroup.MarginLayoutParams) layout.findViewWithTag("p1l").getLayoutParams();
         trules1.setMargins(OFFSET_LEFT - CELLSIZE, (int) (OFFSET_TOP + CELLSIZE * Maze.SIZE_Y + OFFSET_BETWEEN), 0, 0);
         layout.findViewWithTag("p1l").requestLayout();
-        layout.getBackground().setAlpha(255);
 
-        RelativeLayout relativeLayout = (RelativeLayout) layout.findViewWithTag("p1l");
+        final RelativeLayout relativeLayout = (RelativeLayout) layout.findViewWithTag("p1l");
+
+        relativeLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(
+                            view);
+                    view.startDrag(data, shadowBuilder, view, 0);
+                    view.setVisibility(View.INVISIBLE);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+
         ImageView imageView = (ImageView) relativeLayout.findViewWithTag("C1");
         ViewGroup.MarginLayoutParams trules1c = (ViewGroup.MarginLayoutParams) imageView.getLayoutParams();
         trules1c.setMargins((Maze.SIZE_X - 1) * CELLSIZE, (Maze.SIZE_Y - 1) * CELLSIZE, 0, 0);
@@ -249,7 +335,21 @@ public class StartPage extends AppCompatActivity {
 
         Rl.setTag(idStr1);
 
-
+        Rl.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(
+                            view);
+                    view.startDrag(data, shadowBuilder, view, 0);
+                    view.setVisibility(View.INVISIBLE);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
 
         layoutbd.addView(Rl, rules1);
 
@@ -270,7 +370,6 @@ public class StartPage extends AppCompatActivity {
     private void deleteLayout(String res) {
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         l.removeView(findViewById(getResources().getIdentifier(res, "id", getPackageName())));
-        RelativeLayout l1 = (RelativeLayout) findViewById(R.id.p0l);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
         layout.removeView(layout.findViewWithTag(res));
     }
