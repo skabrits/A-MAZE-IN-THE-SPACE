@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class MazeBuilder extends AppCompatActivity {
             public void onClick(View view) {
                 TextView wc = (TextView) findViewById(R.id.WCounter);
                 TextView hc = (TextView) findViewById(R.id.HCounter);
-                int[][] PMaze = new int[Integer.parseInt(hc.getText().toString())][Integer.parseInt(wc.getText().toString())];
+                int[][] PMaze = new int[2*Integer.parseInt(hc.getText().toString())+1][2*Integer.parseInt(wc.getText().toString())+1];
                 for (int i = 0; i < PMaze.length; i++) {
                     for (int j = 0; j < PMaze[0].length; j++) {
                         PMaze[i][j] = TMaze[i][j];
@@ -61,27 +62,28 @@ public class MazeBuilder extends AppCompatActivity {
                 }
 
                 if (AllIsOk(PMaze)) {
-                    MazeHolder.MazeExample Mazik = new MazeHolder.MazeExample();
+                    MazeExample Mazik = new MazeExample();
                     Mazik.Maze = PMaze;
                     Mazik.BasicCordinats = BC;
                     MazeHolder.MazeArr.add(Mazik);
+
                 }
             }
 
             private boolean AllIsOk(int[][] pMaze) {
                 boolean res = true;
                 if (exitPlaced && IamPlaced) {
-                    for (int i = 0; i < pMaze.length; i++) {
-                        if (i == 0 || i == pMaze.length - 1) {
-                            for (int j = 0; j < pMaze[0].length; j++) {
-                                if (pMaze[i][j] != 1 && pMaze[i][j] != 2){
+                    for (int i = 0; i <= (int) (pMaze.length / 2); i++) {
+                        if (2*i == 0 || 2*i == pMaze.length - 1) {
+                            for (int j = 0; j < (int) (pMaze[0].length / 2); j++) {
+                                if (pMaze[2*i][j*2+1] != 1 && pMaze[i*2][j*2+1] != 2){
                                     res = false;
                                     Toast t = Toast.makeText(getApplicationContext(), "You haven't placed all walls yet", Toast.LENGTH_SHORT);
                                     t.show();
                                 }
                             }
                         } else {
-                            if ((pMaze[i][0] != 1 && pMaze[i][0] != 2) || (pMaze[i][pMaze[0].length - 1] != 1 && pMaze[i][pMaze[0].length - 1] != 2)){
+                            if ((pMaze[i*2+1][0] != 1 && pMaze[i*2+1][0] != 2) || (pMaze[i*2+1][pMaze[0].length - 1] != 1 && pMaze[i*2+1][pMaze[0].length - 1] != 2)){
                                 res = false;
                                 Toast t = Toast.makeText(getApplicationContext(), "You haven't placed all walls yet", Toast.LENGTH_SHORT);
                                 t.show();
@@ -213,10 +215,14 @@ public class MazeBuilder extends AppCompatActivity {
                                         bt.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
-                                                int tpnum = Integer.parseInt(et.getText().toString());
-                                                if (checkTPexist(tpnum) && (tpnum % 100 >= 1) && (tpnum % 100 <= 9) && (tpnum - (tpnum % 100) * 100 >= 1) && (tpnum - (tpnum % 100) * 100 <= 99)) {
+                                                Integer tpnum = 0;
+                                                tpnum = tryParse(et.getText().toString());
+                                                if (tpnum == null) {
+                                                    tpnum = 0;
+                                                }
+                                                if (checkTPexist(tpnum) && ((int) (tpnum / 100) >= 1) && ((int) (tpnum / 100) <= 9) && (tpnum - ((int) (tpnum / 100)) * 100 >= 1) && (tpnum - ((int) (tpnum / 100)) * 100 <= 99)) {
                                                     TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = tpnum;
-                                                    tp_num.put(thisView.getTag().toString(),tpnum);
+                                                    tp_num.put(thisView.getTag().toString(), tpnum);
                                                     ImageView iv = (ImageView) addl.getChildAt(finalI);
                                                     ImageView imageView = new ImageView(thisView.getContext());
                                                     imageView.setImageDrawable(iv.getDrawable());
@@ -236,6 +242,8 @@ public class MazeBuilder extends AppCompatActivity {
                                                 for (Integer i : tp_num.values()) {
                                                     if (tpnum == i){
                                                         res = false;
+                                                        Toast t = Toast.makeText(getApplicationContext(), "Tp was", Toast.LENGTH_SHORT);
+                                                        t.show();
                                                     }
                                                 }
                                                 return res;
@@ -261,6 +269,16 @@ public class MazeBuilder extends AppCompatActivity {
                                 }
                             }
                         }
+                    }
+                }
+
+                private Integer tryParse(String text) {
+                    try {
+                        return Integer.parseInt(text);
+                    } catch (NumberFormatException e) {
+                        Toast t = Toast.makeText(getApplicationContext(), "No letters!", Toast.LENGTH_SHORT);
+                        t.show();
+                        return null;
                     }
                 }
 
@@ -449,7 +467,7 @@ public class MazeBuilder extends AppCompatActivity {
                     break;
                 }
             }
-            if (finalI <= 13 && finalI >= 9) {
+            if (finalI <= 13 || finalI >= 9) {
                 thisView.removeView(thisView.findViewWithTag(String.valueOf(finalI)));
             }
         }

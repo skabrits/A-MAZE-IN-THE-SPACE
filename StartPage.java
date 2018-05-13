@@ -61,8 +61,8 @@ public class StartPage extends AppCompatActivity {
         ImageView c1 = (ImageView) findViewById(R.id.C1);
         zerocor[0]=(int) ConvDPtoPX(150);
         zerocor[1]=(int) ConvDPtoPX(180);
-        CurBasicCord[0] = MazeHolder.BasicCordinats[0];
-        CurBasicCord[1] = MazeHolder.BasicCordinats[1];
+        CurBasicCord[0] = Maze.YourCordInMaze[0];
+        CurBasicCord[1] = Maze.YourCordInMaze[1];
         changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
@@ -729,7 +729,7 @@ public class StartPage extends AppCompatActivity {
                     go(Maze.YourCordInMaze, (int) Math.pow(10, side - 1));
                 } else {
                     if (Maze.Maze[Maze.YourCordInMaze[0] - 1][Maze.YourCordInMaze[1]] == 2) {
-                        changeCell(new int[] {Maze.YourCordInMaze[0] - 1,Maze.YourCordInMaze[1]}, R.drawable.exitup);
+                        changeCell(new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.exitup);
                         Maze.YourMazesholder.get(NativeLayout)[Maze.YourCordInMaze[0] - 1][Maze.YourCordInMaze[1]] = 2;
                         finishgame();
                     } else {
@@ -743,7 +743,7 @@ public class StartPage extends AppCompatActivity {
                     go(Maze.YourCordInMaze, (int) Math.pow(10, side - 1));
                 } else {
                     if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] + 1] == 2) {
-                        changeCell(new int[] {Maze.YourCordInMaze[0],Maze.YourCordInMaze[1] + 1}, R.drawable.exitright);
+                        changeCell(new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.exitright);
                         Maze.YourMazesholder.get(NativeLayout)[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] + 1] = 2;
                         finishgame();
                     } else {
@@ -757,7 +757,7 @@ public class StartPage extends AppCompatActivity {
                     go(Maze.YourCordInMaze, (int) Math.pow(10, side - 1));
                 } else {
                     if (Maze.Maze[Maze.YourCordInMaze[0] + 1][Maze.YourCordInMaze[1]] == 2) {
-                        changeCell(new int[] {Maze.YourCordInMaze[0] + 1,Maze.YourCordInMaze[1]}, R.drawable.exitdown);
+                        changeCell(new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.exitdown);
                         Maze.YourMazesholder.get(NativeLayout)[Maze.YourCordInMaze[0] + 1][Maze.YourCordInMaze[1]] = 2;
                         finishgame();
                     } else {
@@ -771,8 +771,8 @@ public class StartPage extends AppCompatActivity {
                     go(Maze.YourCordInMaze, (int) Math.pow(10, side - 1));
                 } else {
                     if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] - 1] == 2) {
-                        changeCell(new int[] {Maze.YourCordInMaze[0],Maze.YourCordInMaze[1] - 1}, R.drawable.exitleft);
-                        Maze.YourMazesholder.get(NativeLayout)[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] - 1] = 2;
+                        changeCell(new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.exitleft);
+                        Maze.YourMazesholder.get(NativeLayout)[Maze.YourCordInMaze[0] + 1][Maze.YourCordInMaze[1]] = 2;
                         finishgame();
                     } else {
                         noact(Maze.YourCordInMaze, (int) Math.pow(10, side - 1));

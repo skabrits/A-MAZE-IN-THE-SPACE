@@ -10,17 +10,21 @@ import static com.example.sevak.themaze.StartPage.TELEPORT;
  */
 
 public class Maze {
-    public static int[][] Maze = MazeHolder.MazeArr.get(0).Maze;
-    public static int SIZE_X = (Maze[0].length - 1)/2;
-    public static int SIZE_Y = (Maze.length - 1)/2;
+    public static int[][] Maze;
+    public static int SIZE_X;
+    public static int SIZE_Y;
 
     public static int[] YourCordInMaze = new int[2];
 
-    public static int[][] YourMaze = new int[Maze.length][Maze[0].length];
+    public static int[][] YourMaze;
     public static Map<Integer,int[]> Teleports = new HashMap<Integer, int[]>();
     public static Map<Integer,int[][]> YourMazesholder = new HashMap<Integer, int[][]>();
     public static void  init() {
         MazeHolder.init();
+        Maze = MazeHolder.MazeArr.get(0).Maze;
+        SIZE_X = (Maze[0].length - 1)/2;
+        SIZE_Y = (Maze.length - 1)/2;
+        YourMaze = new int[Maze.length][Maze[0].length];
         YourMazesholder.clear();
         YourCordInMaze[0] = MazeHolder.MazeArr.get(0).BasicCordinats[0];
         YourCordInMaze[1] = MazeHolder.MazeArr.get(0).BasicCordinats[1];
