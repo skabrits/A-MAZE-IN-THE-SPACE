@@ -1,17 +1,10 @@
 package com.example.sevak.themaze;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.Intent;
-import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.method.Touch;
 import android.util.DisplayMetrics;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -19,13 +12,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import static android.widget.Toast.LENGTH_SHORT;
 
 public class StartPage extends AppCompatActivity {
     public static final int CELLSIZE = 140;
@@ -38,10 +27,20 @@ public class StartPage extends AppCompatActivity {
     public static final int OFFSET_LEFT = 400;
     public static final int OFFSET_TOP = 400;
     public static final int OFFSET_BETWEEN = 10;
+    public static final int MINOTAUR = 5;
+    public static final int HOSPITAL = 6;
+    public static final int BULLET = 4;
+    public static final int BFG = 3;
+    public static final int KEY = 2;
+    public static final int DEAD_MINOTAUR = 7;
+    public static final int USED_BULLET = 8;
     private Integer layoutAmount = 1;
     private Integer CurrentLayout = 1;
     private Integer NativeLayout = 1;
     private Integer ThisLayout = 0;
+    private Integer bulletAmount = 0;
+    private Boolean isAnYweapon = false;
+    private Boolean isAnYkey = false;
 
     private GestureDetector mDetector;
     private float ConvDPtoPX(float dp){
@@ -220,6 +219,33 @@ public class StartPage extends AppCompatActivity {
         }
 
         @Override
+        public void onLongPress(MotionEvent e) {
+            int x = (int)e.getX();
+            int y = (int)e.getY();
+            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * CELLSIZE/2;
+            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * CELLSIZE/2;
+            int xin = (x>curx + CELLSIZE) ? 1 : ((x<curx) ? -1 : 0);
+            int yin = (y>cury + CELLSIZE) ? 1 : ((y<cury) ? -1 : 0);
+            if (xin < 0) {
+                if (yin == 0)
+                    shoot(TURN_LEFT);
+            } else
+            if (xin > 0) {
+                if (yin == 0)
+                    shoot(TURN_RIGHT);
+            } else
+            if (xin == 0) {
+                if (yin<0)
+                    shoot(TURN_UP);
+                else
+                if (yin>0)
+                    shoot(TURN_DOWN);
+                else
+                    shoot(TURN_NA);
+            }
+        }
+
+        @Override
         public boolean onDoubleTap(MotionEvent e) {
             int x = (int)e.getX();
             int y = (int)e.getY();
@@ -241,23 +267,88 @@ public class StartPage extends AppCompatActivity {
                         else
                         if (yin>0)
                             turn(TURN_DOWN);
-                        else
-                            turn(TURN_NA);
                 }
             return true;
         }
     }
+
+    static int[] Bulletcoord = new int[2];
+    private void shoot(int side) {
+        boolean end = true;
+        Bulletcoord = new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]};
+        while (end) {
+            switch (side) {
+                case TURN_UP: {
+                    if (Maze.Maze[Bulletcoord[0] - 1][Bulletcoord[1]] == 0) {
+                        goforBullet(Bulletcoord, (int) Math.pow(10, side - 1));
+                    } else {
+                        end = false;
+                    }
+                    break;
+                }
+                case TURN_RIGHT: {
+                    if (Maze.Maze[Bulletcoord[0]][Bulletcoord[1] + 1] == 0) {
+                        goforBullet(Bulletcoord, (int) Math.pow(10, side - 1));
+                    } else {
+                        end = false;
+                    }
+                    break;
+                }
+                case TURN_DOWN: {
+                    if (Maze.Maze[Bulletcoord[0] + 1][Bulletcoord[1]] == 0) {
+                        goforBullet(Bulletcoord, (int) Math.pow(10, side - 1));
+                    } else {
+                        end = false;
+                    }
+                    break;
+                }
+                case TURN_LEFT: {
+                    if (Maze.Maze[Bulletcoord[0]][Bulletcoord[1] - 1] == 0) {
+                        goforBullet(Bulletcoord, (int) Math.pow(10, side - 1));
+                    } else {
+                        end = false;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void goforBullet(int[] cord, int side) {
+        switch (side) {
+            case 1: {
+                if (Maze.Maze[cord[0] - 2][cord[1]] == MINOTAUR) {
+                    Maze.Maze[cord[0] - 2][cord[1]] = DEAD_MINOTAUR;
+                }
+                Bulletcoord[0] = cord[0] - 2;
+                break;
+            }
+            case 10: {
+                if (Maze.Maze[cord[0]][cord[1] + 2] == MINOTAUR) {
+                    Maze.Maze[cord[0]][cord[1] + 2] = DEAD_MINOTAUR;
+                }
+                Bulletcoord[1] = cord[1] + 2;
+                break;
+            }
+            case 100: {
+                if (Maze.Maze[cord[0] + 2][cord[1]] == MINOTAUR) {
+                    Maze.Maze[cord[0] + 2][cord[1]] = DEAD_MINOTAUR;
+                }
+                Bulletcoord[0] = cord[0] + 2;
+                break;
+            }
+            case 1000: {
+                if (Maze.Maze[cord[0]][cord[1] - 2] == MINOTAUR) {
+                    Maze.Maze[cord[0]][cord[1] - 2] = DEAD_MINOTAUR;
+                }
+                Bulletcoord[1] = cord[1] - 2;
+                break;
+            }
+        }
+    }
+
     private void teleport(int[] cord) {
-        ImageView iMv = (ImageView) findViewById(R.id.Me);
-        delView(iMv);
-        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-        delTagView(iMvc);
-        prepareNEWlayout();
-        setLayoutAScurrent(layoutAmount);
-        CurrentLayout = layoutAmount;
-        NativeLayout = CurrentLayout;
-        goToThisLayout(layoutAmount);
-        ThisLayout = NativeLayout;
+        moveTOnewlayout();
         int teleport_number = Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]];
         int[] teleportCoord = Maze.Teleports.get(teleport_number+1);
         if (teleportCoord == null)
@@ -272,6 +363,19 @@ public class StartPage extends AppCompatActivity {
         CurBasicCord[1] = Maze.YourCordInMaze[1];
         Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
         changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
+    }
+
+    private void moveTOnewlayout() {
+        ImageView iMv = (ImageView) findViewById(R.id.Me);
+        delView(iMv);
+        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+        delTagView(iMvc);
+        prepareNEWlayout();
+        setLayoutAScurrent(layoutAmount);
+        CurrentLayout = layoutAmount;
+        NativeLayout = CurrentLayout;
+        goToThisLayout(layoutAmount);
+        ThisLayout = NativeLayout;
     }
 
     private void setLayoutAScurrent(final Integer ln){
@@ -389,16 +493,7 @@ public class StartPage extends AppCompatActivity {
                 if (Maze.Maze[Maze.YourCordInMaze[0] - 2][Maze.YourCordInMaze[1]] > 10) {
                     goFORriver(cord, 1);
                 } else {
-                    ImageView iMv = (ImageView) findViewById(R.id.Me);
-                    delView(iMv);
-                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-                    delTagView(iMvc);
-                    prepareNEWlayout();
-                    setLayoutAScurrent(layoutAmount);
-                    CurrentLayout = layoutAmount;
-                    NativeLayout = CurrentLayout;
-                    goToThisLayout(layoutAmount);
-                    ThisLayout = NativeLayout;
+                    moveTOnewlayout();
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -412,16 +507,7 @@ public class StartPage extends AppCompatActivity {
                 if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] + 2] > 10) {
                     goFORriver(cord, 10);
                 } else {
-                    ImageView iMv = (ImageView) findViewById(R.id.Me);
-                    delView(iMv);
-                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-                    delTagView(iMvc);
-                    prepareNEWlayout();
-                    setLayoutAScurrent(layoutAmount);
-                    CurrentLayout = layoutAmount;
-                    NativeLayout = CurrentLayout;
-                    goToThisLayout(layoutAmount);
-                    ThisLayout = NativeLayout;
+                    moveTOnewlayout();
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -435,16 +521,7 @@ public class StartPage extends AppCompatActivity {
                 if (Maze.Maze[Maze.YourCordInMaze[0] + 2][Maze.YourCordInMaze[1]] > 10) {
                     goFORriver(cord, 100);
                 } else {
-                    ImageView iMv = (ImageView) findViewById(R.id.Me);
-                    delView(iMv);
-                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-                    delTagView(iMvc);
-                    prepareNEWlayout();
-                    setLayoutAScurrent(layoutAmount);
-                    CurrentLayout = layoutAmount;
-                    NativeLayout = CurrentLayout;
-                    goToThisLayout(layoutAmount);
-                    ThisLayout = NativeLayout;
+                    moveTOnewlayout();
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -458,16 +535,7 @@ public class StartPage extends AppCompatActivity {
                 if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1] - 2] > 10) {
                     goFORriver(cord, 1000);
                 } else {
-                    ImageView iMv = (ImageView) findViewById(R.id.Me);
-                    delView(iMv);
-                    ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-                    delTagView(iMvc);
-                    prepareNEWlayout();
-                    setLayoutAScurrent(layoutAmount);
-                    CurrentLayout = layoutAmount;
-                    NativeLayout = CurrentLayout;
-                    goToThisLayout(layoutAmount);
-                    ThisLayout = NativeLayout;
+                    moveTOnewlayout();
                     CurBasicCord[0] = Maze.YourCordInMaze[0];
                     CurBasicCord[1] = Maze.YourCordInMaze[1];
                     Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
@@ -493,13 +561,7 @@ public class StartPage extends AppCompatActivity {
                 if (!b) {
                     changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.walls0);
                 }
-                ImageView iv = (ImageView) findViewById(R.id.Me);
-                delView(iv);
-                changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
-                ImageView ivc = (ImageView) findViewById(R.id.Mec);
-                delTagView(ivc);
-                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
-                checkTheRvrORtp();
+                GoEvents();
                 break;
             }
             case 10: {
@@ -513,13 +575,7 @@ public class StartPage extends AppCompatActivity {
                 if (!b) {
                     changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.walls0);
                 }
-                ImageView iv = (ImageView) findViewById(R.id.Me);
-                delView(iv);
-                changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
-                ImageView ivc = (ImageView) findViewById(R.id.Mec);
-                delTagView(ivc);
-                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
-                checkTheRvrORtp();
+                GoEvents();
                 break;
             }
             case 100: {
@@ -533,13 +589,7 @@ public class StartPage extends AppCompatActivity {
                 if (!b) {
                     changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.walls0);
                 }
-                ImageView iv = (ImageView) findViewById(R.id.Me);
-                delView(iv);
-                changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
-                ImageView ivc = (ImageView) findViewById(R.id.Mec);
-                delTagView(ivc);
-                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
-                checkTheRvrORtp();
+                GoEvents();
                 break;
             }
             case 1000: {
@@ -553,16 +603,81 @@ public class StartPage extends AppCompatActivity {
                 if (!b) {
                     changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.walls0);
                 }
-                ImageView iv = (ImageView) findViewById(R.id.Me);
-                delView(iv);
-                changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
-                ImageView ivc = (ImageView) findViewById(R.id.Mec);
-                delTagView(ivc);
-                changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
-                checkTheRvrORtp();
+                GoEvents();
                 break;
             }
         }
+    }
+
+    private void GoEvents() {
+        ImageView iv = (ImageView) findViewById(R.id.Me);
+        delView(iv);
+        changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+        ImageView ivc = (ImageView) findViewById(R.id.Mec);
+        delTagView(ivc);
+        changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
+        checkTheRvrORtp();
+        checkMinotaur();
+        checkBullet();
+        if (Maze.isWeapon) {
+            checkBFG();
+        }
+        if (Maze.isKey) {
+            checkKEY();
+        }
+    }
+
+    private void checkKEY() {
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == KEY) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.key);
+            Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 0;
+            isAnYkey = true;
+        }
+    }
+
+    private void checkBFG() {
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == BFG) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bfg);
+            Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 0;
+            isAnYweapon = true;
+        }
+    }
+
+    private void checkBullet() {
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == BULLET) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
+            Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 8;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
+            bulletAmount += 1;
+        }
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == USED_BULLET) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
+        }
+    }
+
+    private void checkMinotaur() {
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == MINOTAUR) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.minotavr);
+            die(Maze.YourCordInMaze);
+        }
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == DEAD_MINOTAUR) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.deadminotavr);
+        }
+    }
+
+    private void die(int[] yourCordInMaze) {
+        moveTOnewlayout();
+        Maze.YourCordInMaze[0] = Maze.hospital.get(HOSPITAL)[0];
+        Maze.YourCordInMaze[1] = Maze.hospital.get(HOSPITAL)[1];
+        CurBasicCord[0] = Maze.YourCordInMaze[0];
+        CurBasicCord[1] = Maze.YourCordInMaze[1];
+        Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+        changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
     }
 
     private void goFORriver(int[] cord, int side){
@@ -591,8 +706,18 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void finishgame(){
-        Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
-        t.show();
+        if (Maze.isKey){
+            if (isAnYkey) {
+                Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
+                t.show();
+            } else {
+                Toast t = Toast.makeText(getApplicationContext(), "You need key", Toast.LENGTH_SHORT);
+                t.show();
+            }
+        } else {
+            Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
+            t.show();
+        }
     }
     private void noact(int[] cord, int side){
 
