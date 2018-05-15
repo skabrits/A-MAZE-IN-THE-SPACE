@@ -28,8 +28,9 @@ public class Maze {
 
     public static void  init() {
         MazeHolder.init();
-        for (int i = 0; i < Maze.length; i++) {
-            for (int j = 0; j < Maze[1].length; j++) {
+        Maze = new int[MazeHolder.MazeArr.get(0).Maze.length][MazeHolder.MazeArr.get(0).Maze[1].length];
+        for (int i = 0; i < MazeHolder.MazeArr.get(0).Maze.length; i++) {
+            for (int j = 0; j < MazeHolder.MazeArr.get(0).Maze[1].length; j++) {
                 Maze[i][j] = MazeHolder.MazeArr.get(0).Maze[i][j];
             }
         }
@@ -71,9 +72,9 @@ public class Maze {
             }
         }
         isKey = false;
-        for (int i = 0; i < Maze.length; i++) {
-            for (int j = 0; j < Maze[i].length; j++) {
-                if (Maze[i][j] == KEY) {
+        for (int i = 0; i < (Maze.length - 1) / 2; i++) {
+            for (int j = 0; j < (Maze[i].length - 1) / 2; j++) {
+                if (Maze[i * 2 + 1][j * 2 + 1] == KEY) {
                     isKey = true;
                 }
             }

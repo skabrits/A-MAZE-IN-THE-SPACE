@@ -275,6 +275,8 @@ public class StartPage extends AppCompatActivity {
     static int[] Bulletcoord = new int[2];
     private void shoot(int side) {
         boolean end = true;
+        Toast t = Toast.makeText(getApplicationContext(), "Boom, Shaka-laka", Toast.LENGTH_SHORT);
+        t.show();
         Bulletcoord = new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]};
         while (end) {
             switch (side) {
@@ -647,11 +649,6 @@ public class StartPage extends AppCompatActivity {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == BULLET) {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
             Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 8;
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
             bulletAmount += 1;
         }

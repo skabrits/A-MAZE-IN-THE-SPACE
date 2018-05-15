@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,14 +90,16 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                     for (Integer i : tp_num.values()) {
                         ArrayList<Integer> tpAr = new ArrayList<Integer>();
-                        tpAr.add((i % 100), i);
+                        tpAr.add(i);
                         for (Integer j : tp_num.values()) {
                             if ((((int) (i / 100)) == ((int) (j / 100))) && (i != j)){
-                                tpAr.add((j % 100), j);
+                                tpAr.add(j);
                             }
                         }
+                        Collections.sort(tpAr,
+                                (m1, m2) -> (int) (m1 - m2));
                         for (int j = 1; j < tpAr.size(); j++) {
-                            if (tpAr.get(i) != (tpAr.get(i - 1) + 1)){
+                            if (tpAr.get(j) != (tpAr.get(j - 1) + 1)){
                                 res = false;
                                 Toast t = Toast.makeText(getApplicationContext(), "You haven't placed teleports correctly", Toast.LENGTH_SHORT);
                                 t.show();
@@ -155,9 +158,9 @@ public class MazeBuilder extends AppCompatActivity {
                                 imageView.setImageDrawable(iv.getDrawable());
                                 imageView.setTag(String.valueOf(finalI));
                                 thisView.addView(imageView);
-                                IamPlaced = true;
+                                hospitalPlaced = true;
                             } else {
-                                Toast t = Toast.makeText(getApplicationContext(), "You have placed start point already", Toast.LENGTH_SHORT);
+                                Toast t = Toast.makeText(getApplicationContext(), "You have placed hospital already", Toast.LENGTH_SHORT);
                                 t.show();
                             }
                         } else {
