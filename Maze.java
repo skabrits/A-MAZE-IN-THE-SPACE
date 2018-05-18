@@ -19,6 +19,7 @@ public class Maze {
 
     public static int[] YourCordInMaze = new int[2];
 
+    public static int rand;
     public static int[][] YourMaze;
     public static Map<Integer,int[]> Teleports = new HashMap<Integer, int[]>();
     public static Map<Integer,int[][]> YourMazesholder = new HashMap<Integer, int[][]>();
@@ -27,25 +28,24 @@ public class Maze {
     public static Boolean isKey = false;
 
     public static void  init() {
-        MazeHolder.init();
-        Maze = new int[MazeHolder.MazeArr.get(0).Maze.length][MazeHolder.MazeArr.get(0).Maze[1].length];
-        for (int i = 0; i < MazeHolder.MazeArr.get(0).Maze.length; i++) {
-            for (int j = 0; j < MazeHolder.MazeArr.get(0).Maze[1].length; j++) {
-                Maze[i][j] = MazeHolder.MazeArr.get(0).Maze[i][j];
+        Maze = new int[MazeHolder.MazeArr.get(rand).Maze.length][MazeHolder.MazeArr.get(rand).Maze[1].length];
+        for (int i = 0; i < MazeHolder.MazeArr.get(rand).Maze.length; i++) {
+            for (int j = 0; j < MazeHolder.MazeArr.get(rand).Maze[1].length; j++) {
+                Maze[i][j] = MazeHolder.MazeArr.get(rand).Maze[i][j];
             }
         }
         SIZE_X = (Maze[0].length - 1)/2;
         SIZE_Y = (Maze.length - 1)/2;
         YourMaze = new int[Maze.length][Maze[0].length];
         YourMazesholder.clear();
-        YourCordInMaze[0] = MazeHolder.MazeArr.get(0).BasicCordinats[0];
-        YourCordInMaze[1] = MazeHolder.MazeArr.get(0).BasicCordinats[1];
+        YourCordInMaze[0] = MazeHolder.MazeArr.get(rand).BasicCordinats[0];
+        YourCordInMaze[1] = MazeHolder.MazeArr.get(rand).BasicCordinats[1];
         for (int i = 0; i < Maze.length; i++) {
             for (int j = 0; j < Maze[1].length; j++) {
                 YourMaze[i][j] = -1;
             }
         }
-        YourMaze[MazeHolder.MazeArr.get(0).BasicCordinats[0]][MazeHolder.MazeArr.get(0).BasicCordinats[1]] = 0;
+        YourMaze[MazeHolder.MazeArr.get(rand).BasicCordinats[0]][MazeHolder.MazeArr.get(rand).BasicCordinats[1]] = 0;
         YourMazesholder.put(1, YourMaze);
         Teleports.clear();
         for (int i = 0; i < Maze.length; i++) {

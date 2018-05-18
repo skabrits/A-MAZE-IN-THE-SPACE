@@ -27,6 +27,7 @@ public class MazeHolder {
         MazeExample FirstMaze = new MazeExample();
         FirstMaze.Maze = Maze;
         FirstMaze.BasicCordinats = BasicCordinats;
+        FirstMaze.name = "Begining";
         MazeArr.add(FirstMaze);
     }
 }

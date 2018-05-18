@@ -15,12 +15,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        MazeHolder.init();
+
         ImageView start = (ImageView) findViewById(R.id.StartGame);
         start.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), StartPage.class));
+                startActivity(new Intent(getApplicationContext(), Predbannik.class));
             }
         });
         ImageView levelb = (ImageView) findViewById(R.id.LevelBuilder);

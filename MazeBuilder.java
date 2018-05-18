@@ -75,8 +75,32 @@ public class MazeBuilder extends AppCompatActivity {
                     MazeExample Mazik = new MazeExample();
                     Mazik.Maze = PMaze;
                     Mazik.BasicCordinats = BC;
-                    MazeHolder.MazeArr.add(Mazik);
-
+                    final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
+                    final EditText et = new EditText(rl.getContext());
+                    RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.WRAP_CONTENT,
+                            RelativeLayout.LayoutParams.WRAP_CONTENT);
+                    p.setMargins(300, 10, 10, 10);
+                    et.setHint("write maze name");
+                    rl.addView(et, p);
+                    final Button bt = new Button(rl.getContext());
+                    RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.WRAP_CONTENT,
+                            RelativeLayout.LayoutParams.WRAP_CONTENT);
+                    bt.setText("confirm");
+                    p1.setMargins(500, 10, 10, 10);
+                    rl.addView(bt, p1);
+                    bt.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Mazik.name = et.getText().toString();
+                            MazeHolder.MazeArr.add(Mazik);
+                            Toast t = Toast.makeText(getApplicationContext(), "A maze has been created", Toast.LENGTH_SHORT);
+                            t.show();
+                            et.setVisibility(View.GONE);
+                            bt.setVisibility(View.GONE);
+                        }
+                    });
                 }
             }
 
@@ -196,7 +220,7 @@ public class MazeBuilder extends AppCompatActivity {
                                     }
                                 } else {
                                     if (finalI >= 10 && finalI <= 13) {
-                                        if (!exitPlaced) {
+                                        if ((!exitPlaced) && wallcheck()) {
                                             final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                             switch (finalI) {
                                                 case 10: {
@@ -227,7 +251,7 @@ public class MazeBuilder extends AppCompatActivity {
                                             t.show();
                                         }
                                     } else {
-                                        if ((checkWAS() == null) || ((finalI >= 0) && (finalI < 2)) || ((finalI >= 6) && (finalI < 8))) {
+                                        if ((checkWAS(finalI) == null) || ((((finalI >= 0) && (finalI < 2)) || ((finalI >= 6) && (finalI < 8))) && exitcheck())) {
                                             final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                             switch (finalI) {
                                                 case 0: {
@@ -268,14 +292,15 @@ public class MazeBuilder extends AppCompatActivity {
                                                     RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
                                                             RelativeLayout.LayoutParams.WRAP_CONTENT,
                                                             RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                                    p.setMargins(300, 10, 0, 0);
+                                                    p.setMargins(300, 10, 10, 10);
                                                     et.setHint("write tp number in form xyy, x - series number, yy - teleport number in series");
                                                     rl.addView(et, p);
                                                     final Button bt = new Button(rl.getContext());
                                                     RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
                                                             RelativeLayout.LayoutParams.WRAP_CONTENT,
                                                             RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                                    p1.setMargins(350, 10, 0, 0);
+                                                    bt.setText("confirm");
+                                                    p1.setMargins(500, 10, 10, 10);
                                                     rl.addView(bt, p1);
                                                     bt.setOnClickListener(new View.OnClickListener() {
                                                         @Override
@@ -346,6 +371,42 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                 }
 
+                private boolean wallcheck() {
+                    ImageView res;
+                    res = null;
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(0)) != null && ((finalI - 10) == 0)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(0));
+                    }
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(1)) != null && ((finalI - 10) == 2)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(1));
+                    }
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(6)) != null && ((finalI - 10) == 3)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(6));
+                    }if ((ImageView) thisView.findViewWithTag(String.valueOf(7)) != null && ((finalI - 10) == 1)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(7));
+                    }
+                    return (res == null);
+                }
+
+                private boolean exitcheck() {
+                    ImageView res;
+                    res = null;
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(10)) != null && ((finalI + 10) == 10)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(10));
+                    }
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(12)) != null && ((finalI + 10) == 11)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(12));
+                    }
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(13)) != null && ((finalI + 6) == 12)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(13));
+                    }
+                    if ((ImageView) thisView.findViewWithTag(String.valueOf(11)) != null && ((finalI + 6) == 13)) {
+                        res = (ImageView) thisView.findViewWithTag(String.valueOf(11));
+                    }
+
+                    return (res == null);
+                }
+
                 private Integer tryParse(String text) {
                     try {
                         return Integer.parseInt(text);
@@ -356,7 +417,7 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                 }
 
-                private ImageView checkWAS() {
+                private ImageView checkWAS(int finalI) {
                     ImageView res;
                     res = null;
                     for (int j = 2; j < 6; j++) {
@@ -364,7 +425,13 @@ public class MazeBuilder extends AppCompatActivity {
                             res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
                         }
                     }
-                    for (int j = 8; j < addl.getChildCount(); j++) {
+                    for (int j = 8; j < 10; j++) {
+                        if ((ImageView) thisView.findViewWithTag(String.valueOf(j)) != null) {
+                            res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
+                        }
+                    }
+
+                    for (int j = 14; j < addl.getChildCount(); j++) {
                         if ((ImageView) thisView.findViewWithTag(String.valueOf(j)) != null) {
                             res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
                         }
@@ -599,13 +666,23 @@ public class MazeBuilder extends AppCompatActivity {
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
         for (int i = 0; i < Integer.parseInt(wc.getText().toString()); i++) {
             RelativeLayout view = (RelativeLayout) layout.findViewWithTag((Integer.parseInt(hc.getText().toString()) - 1) + " " + String.valueOf(i));
-            RelativeLayout rl = thisView;
-            thisView = view;
-            final int finalI = i;
-            KillCellElem(finalI);
-            layout.removeView(view);
-            thisView = rl;
+            DelBody(layout, view);
         }
+    }
+
+    private void DelBody(RelativeLayout layout, RelativeLayout view) {
+        RelativeLayout rl = thisView;
+        if (rl == null){
+            rl = layout.findViewWithTag(0 + " " + 0);
+        } else if (thisView.equals(view)){
+            rl = layout.findViewWithTag(0 + " " + 0);
+        }
+        thisView = view;
+        for (int j = 1; j < thisView.getChildCount(); j++) {
+            KillCellElem(Integer.parseInt(thisView.getChildAt(j).getTag().toString()));
+        }
+        layout.removeView(view);
+        thisView = rl;
     }
 
     private void addline() {
@@ -666,12 +743,7 @@ public class MazeBuilder extends AppCompatActivity {
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
         for (int i = 0; i < Integer.parseInt(hc.getText().toString()); i++) {
             RelativeLayout view = (RelativeLayout) layout.findViewWithTag(String.valueOf(i) + " " + (Integer.parseInt(wc.getText().toString()) - 1));
-            RelativeLayout rl = thisView;
-            thisView = view;
-            final int fi = i;
-            KillCellElem(fi);
-            layout.removeView(view);
-            thisView = rl;
+            DelBody(layout, view);
         }
     }
 }
