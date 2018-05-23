@@ -240,8 +240,6 @@ public class StartPage extends AppCompatActivity {
                 else
                 if (yin>0)
                     shoot(TURN_DOWN);
-                else
-                    shoot(TURN_NA);
             }
         }
 
@@ -257,17 +255,19 @@ public class StartPage extends AppCompatActivity {
                 if (yin == 0)
                     turn(TURN_LEFT);
             } else
-                if (xin > 0) {
-                    if (yin == 0)
-                        turn(TURN_RIGHT);
-                } else
-                   if (xin == 0) {
-                        if (yin<0)
-                            turn(TURN_UP);
-                        else
-                        if (yin>0)
-                            turn(TURN_DOWN);
-                }
+            if (xin > 0) {
+                if (yin == 0)
+                    turn(TURN_RIGHT);
+            } else
+            if (xin == 0) {
+                if (yin<0)
+                    turn(TURN_UP);
+                else
+                if (yin>0)
+                    turn(TURN_DOWN);
+                else
+                    turn(TURN_NA);
+            }
             return true;
         }
     }
