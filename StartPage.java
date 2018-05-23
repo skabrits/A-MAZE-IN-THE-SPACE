@@ -274,10 +274,30 @@ public class StartPage extends AppCompatActivity {
 
     static int[] Bulletcoord = new int[2];
     private void shoot(int side) {
+        if (bulletAmount > 0) {
+            if (Maze.isWeapon) {
+                if (isAnYweapon) {
+                    shotbody(side);
+                    bulletAmount --;
+                } else {
+                    Toast t = Toast.makeText(getApplicationContext(), "You have no weapon", Toast.LENGTH_SHORT);
+                    t.show();
+                }
+            } else {
+                shotbody(side);
+                bulletAmount --;
+            }
+        } else {
+            Toast t = Toast.makeText(getApplicationContext(), "Not enough bullets, baby", Toast.LENGTH_SHORT);
+            t.show();
+        }
+    }
+
+    private void shotbody(int side) {
         boolean end = true;
         Toast t = Toast.makeText(getApplicationContext(), "Boom, Shaka-laka", Toast.LENGTH_SHORT);
         t.show();
-        Bulletcoord = new int[] {Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]};
+        Bulletcoord = new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]};
         while (end) {
             switch (side) {
                 case TURN_UP: {
@@ -621,11 +641,18 @@ public class StartPage extends AppCompatActivity {
         checkTheRvrORtp();
         checkMinotaur();
         checkBullet();
+        checkHospital();
         if (Maze.isWeapon) {
             checkBFG();
         }
         if (Maze.isKey) {
             checkKEY();
+        }
+    }
+
+    private void checkHospital() {
+        if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == HOSPITAL) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
         }
     }
 
@@ -647,7 +674,7 @@ public class StartPage extends AppCompatActivity {
 
     private void checkBullet() {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == BULLET) {
-            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
+//            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
             Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 8;
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
             bulletAmount += 1;

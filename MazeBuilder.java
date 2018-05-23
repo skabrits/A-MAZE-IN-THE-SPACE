@@ -50,6 +50,8 @@ public class MazeBuilder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maze_builder);
 
+        findViewById(R.id.TheBegin).getBackground().setAlpha(255);
+
         BC = new int[] {1, 1};
 
         for (int i = 0; i < TMaze.length; i++) {
@@ -173,7 +175,7 @@ public class MazeBuilder extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if (thisView.findViewWithTag(String.valueOf(finalI)) == null) {
-                        if (finalI == 15) {
+                        if ((finalI == 15) && (checkWAS(finalI) == null)) {
                             if (!hospitalPlaced) {
                                 int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                 TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 1)] = HOSPITAL;
@@ -188,7 +190,7 @@ public class MazeBuilder extends AppCompatActivity {
                                 t.show();
                             }
                         } else {
-                            if (finalI == 18) {
+                            if ((finalI == 18)  && (checkWAS(finalI) == null)) {
                                 if (!keyPlaced) {
                                     int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                     TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 1)] = KEY;
@@ -203,7 +205,7 @@ public class MazeBuilder extends AppCompatActivity {
                                     t.show();
                                 }
                             } else {
-                                if (finalI == 9) {
+                                if ((finalI == 9) && (checkWAS(finalI) == null)) {
                                     if (!IamPlaced) {
                                         int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                         BC[0] = cordin[0] * 2 + 1;
@@ -220,148 +222,169 @@ public class MazeBuilder extends AppCompatActivity {
                                     }
                                 } else {
                                     if (finalI >= 10 && finalI <= 13) {
-                                        if ((!exitPlaced) && wallcheck()) {
-                                            final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
-                                            switch (finalI) {
-                                                case 10: {
-                                                    TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 2;
-                                                    break;
+                                        if (!exitPlaced) {
+                                            if (wallcheck()) {
+                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                                switch (finalI) {
+                                                    case 10: {
+                                                        TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 2;
+                                                        break;
+                                                    }
+                                                    case 11: {
+                                                        TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 2)] = 2;
+                                                        break;
+                                                    }
+                                                    case 12: {
+                                                        TMaze[cordin[0] * 2 + 2][(cordin[1] * 2 + 1)] = 2;
+                                                        break;
+                                                    }
+                                                    case 13: {
+                                                        TMaze[cordin[0] * 2 + 1][(cordin[1] * 2)] = 2;
+                                                        break;
+                                                    }
                                                 }
-                                                case 11: {
-                                                    TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 2)] = 2;
-                                                    break;
-                                                }
-                                                case 12: {
-                                                    TMaze[cordin[0] * 2 + 2][(cordin[1] * 2 + 1)] = 2;
-                                                    break;
-                                                }
-                                                case 13: {
-                                                    TMaze[cordin[0] * 2 + 1][(cordin[1] * 2)] = 2;
-                                                    break;
-                                                }
-                                            }
-                                            ImageView iv = (ImageView) addl.getChildAt(finalI);
-                                            ImageView imageView = new ImageView(thisView.getContext());
-                                            imageView.setImageDrawable(iv.getDrawable());
-                                            imageView.setTag(String.valueOf(finalI));
-                                            thisView.addView(imageView);
-                                            exitPlaced = true;
-                                        } else {
-                                            Toast t = Toast.makeText(getApplicationContext(), "You have placed exit already", Toast.LENGTH_SHORT);
-                                            t.show();
-                                        }
-                                    } else {
-                                        if ((checkWAS(finalI) == null) || ((((finalI >= 0) && (finalI < 2)) || ((finalI >= 6) && (finalI < 8))) && exitcheck())) {
-                                            final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
-                                            switch (finalI) {
-                                                case 0: {
-                                                    TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 1;
-                                                    break;
-                                                }
-                                                case 1: {
-                                                    TMaze[cordin[0] * 2 + 2][(cordin[1] * 2 + 1)] = 1;
-                                                    break;
-                                                }
-                                                case 2: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 12;
-                                                    break;
-                                                }
-                                                case 3: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 13;
-                                                    break;
-                                                }
-                                                case 4: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 14;
-                                                    break;
-                                                }
-                                                case 5: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 11;
-                                                    break;
-                                                }
-                                                case 6: {
-                                                    TMaze[(cordin[0] * 2 + 1)][cordin[1] * 2] = 1;
-                                                    break;
-                                                }
-                                                case 7: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 2)] = 1;
-                                                    break;
-                                                }
-                                                case 8: {
-                                                    final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
-                                                    final EditText et = new EditText(rl.getContext());
-                                                    RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
-                                                            RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                                    p.setMargins(300, 10, 10, 10);
-                                                    et.setHint("write tp number in form xyy, x - series number, yy - teleport number in series");
-                                                    rl.addView(et, p);
-                                                    final Button bt = new Button(rl.getContext());
-                                                    RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
-                                                            RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                                    bt.setText("confirm");
-                                                    p1.setMargins(500, 10, 10, 10);
-                                                    rl.addView(bt, p1);
-                                                    bt.setOnClickListener(new View.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(View view) {
-                                                            Integer tpnum = 0;
-                                                            tpnum = tryParse(et.getText().toString());
-                                                            if (tpnum == null) {
-                                                                tpnum = 0;
-                                                            }
-                                                            if (checkTPexist(tpnum) && ((int) (tpnum / 100) >= 1) && ((int) (tpnum / 100) <= 9) && (tpnum - ((int) (tpnum / 100)) * 100 >= 1) && (tpnum - ((int) (tpnum / 100)) * 100 <= 99)) {
-                                                                TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = tpnum;
-                                                                tp_num.put(thisView.getTag().toString(), tpnum);
-                                                                ImageView iv = (ImageView) addl.getChildAt(finalI);
-                                                                ImageView imageView = new ImageView(thisView.getContext());
-                                                                imageView.setImageDrawable(iv.getDrawable());
-                                                                imageView.setTag(String.valueOf(finalI));
-                                                                thisView.addView(imageView);
-                                                                rl.removeView(et);
-                                                                rl.removeView(bt);
-                                                            } else {
-                                                                Toast t = Toast.makeText(getApplicationContext(), "Incorrect input", Toast.LENGTH_SHORT);
-                                                                t.show();
-                                                            }
-
-                                                        }
-
-                                                        private boolean checkTPexist(int tpnum) {
-                                                            boolean res = true;
-                                                            for (Integer i : tp_num.values()) {
-                                                                if (tpnum == i) {
-                                                                    res = false;
-                                                                    Toast t = Toast.makeText(getApplicationContext(), "Tp was", Toast.LENGTH_SHORT);
-                                                                    t.show();
-                                                                }
-                                                            }
-                                                            return res;
-                                                        }
-                                                    });
-                                                    break;
-                                                }
-                                                case 14: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = MINOTAUR;
-                                                    minotaurAmmount++;
-                                                    break;
-                                                }
-                                                case 16: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = BFG;
-                                                    break;
-                                                }
-                                                case 17: {
-                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = BULLET;
-                                                    bulletAmmount++;
-                                                    break;
-                                                }
-                                            }
-                                            if (finalI != 8) {
                                                 ImageView iv = (ImageView) addl.getChildAt(finalI);
                                                 ImageView imageView = new ImageView(thisView.getContext());
                                                 imageView.setImageDrawable(iv.getDrawable());
                                                 imageView.setTag(String.valueOf(finalI));
                                                 thisView.addView(imageView);
+                                                exitPlaced = true;
+                                            } else {
+                                                Toast t = Toast.makeText(getApplicationContext(), "can't place", Toast.LENGTH_SHORT);
+                                                t.show();
+                                            }
+                                        } else {
+                                            Toast t = Toast.makeText(getApplicationContext(), "You have placed exit already", Toast.LENGTH_SHORT);
+                                            t.show();
+                                        }
+                                    } else {
+                                        if ((((finalI >= 0) && (finalI < 2)) || ((finalI >= 6) && (finalI < 8)))) {
+                                            if (exitcheck()) {
+                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                                switch (finalI) {
+                                                    case 0: {
+                                                        TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 1;
+                                                        break;
+                                                    }
+                                                    case 1: {
+                                                        TMaze[cordin[0] * 2 + 2][(cordin[1] * 2 + 1)] = 1;
+                                                        break;
+                                                    }
+                                                    case 6: {
+                                                        TMaze[(cordin[0] * 2 + 1)][cordin[1] * 2] = 1;
+                                                        break;
+                                                    }
+                                                    case 7: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 2)] = 1;
+                                                        break;
+                                                    }
+                                                }
+                                                ImageView iv = (ImageView) addl.getChildAt(finalI);
+                                                ImageView imageView = new ImageView(thisView.getContext());
+                                                imageView.setImageDrawable(iv.getDrawable());
+                                                imageView.setTag(String.valueOf(finalI));
+                                                thisView.addView(imageView);
+                                            } else {
+                                                Toast t = Toast.makeText(getApplicationContext(), "can't place", Toast.LENGTH_SHORT);
+                                                t.show();
+                                            }
+                                        } else {
+                                            if ((checkWAS(finalI) == null)) {
+                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                                switch (finalI) {
+                                                    case 2: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 12;
+                                                        break;
+                                                    }
+                                                    case 3: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 13;
+                                                        break;
+                                                    }
+                                                    case 4: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 14;
+                                                        break;
+                                                    }
+                                                    case 5: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 11;
+                                                        break;
+                                                    }
+                                                    case 8: {
+                                                        final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
+                                                        final EditText et = new EditText(rl.getContext());
+                                                        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+                                                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                                                        p.setMargins(300, 10, 10, 10);
+                                                        et.setHint("write tp number in form xyy, x - series number, yy - teleport number in series");
+                                                        rl.addView(et, p);
+                                                        final Button bt = new Button(rl.getContext());
+                                                        RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
+                                                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                                                        bt.setText("confirm");
+                                                        p1.setMargins(500, 10, 10, 10);
+                                                        rl.addView(bt, p1);
+                                                        bt.setOnClickListener(new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View view) {
+                                                                Integer tpnum = 0;
+                                                                tpnum = tryParse(et.getText().toString());
+                                                                if (tpnum == null) {
+                                                                    tpnum = 0;
+                                                                }
+                                                                if (checkTPexist(tpnum) && ((int) (tpnum / 100) >= 1) && ((int) (tpnum / 100) <= 9) && (tpnum - ((int) (tpnum / 100)) * 100 >= 1) && (tpnum - ((int) (tpnum / 100)) * 100 <= 99)) {
+                                                                    TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = tpnum;
+                                                                    tp_num.put(thisView.getTag().toString(), tpnum);
+                                                                    ImageView iv = (ImageView) addl.getChildAt(finalI);
+                                                                    ImageView imageView = new ImageView(thisView.getContext());
+                                                                    imageView.setImageDrawable(iv.getDrawable());
+                                                                    imageView.setTag(String.valueOf(finalI));
+                                                                    thisView.addView(imageView);
+                                                                    rl.removeView(et);
+                                                                    rl.removeView(bt);
+                                                                } else {
+                                                                    Toast t = Toast.makeText(getApplicationContext(), "Incorrect input", Toast.LENGTH_SHORT);
+                                                                    t.show();
+                                                                }
+
+                                                            }
+
+                                                            private boolean checkTPexist(int tpnum) {
+                                                                boolean res = true;
+                                                                for (Integer i : tp_num.values()) {
+                                                                    if (tpnum == i) {
+                                                                        res = false;
+                                                                        Toast t = Toast.makeText(getApplicationContext(), "Tp was", Toast.LENGTH_SHORT);
+                                                                        t.show();
+                                                                    }
+                                                                }
+                                                                return res;
+                                                            }
+                                                        });
+                                                        break;
+                                                    }
+                                                    case 14: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = MINOTAUR;
+                                                        minotaurAmmount++;
+                                                        break;
+                                                    }
+                                                    case 16: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = BFG;
+                                                        break;
+                                                    }
+                                                    case 17: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = BULLET;
+                                                        bulletAmmount++;
+                                                        break;
+                                                    }
+                                                }
+                                                if (finalI != 8) {
+                                                    ImageView iv = (ImageView) addl.getChildAt(finalI);
+                                                    ImageView imageView = new ImageView(thisView.getContext());
+                                                    imageView.setImageDrawable(iv.getDrawable());
+                                                    imageView.setTag(String.valueOf(finalI));
+                                                    thisView.addView(imageView);
+                                                }
                                             }
                                         }
                                     }
