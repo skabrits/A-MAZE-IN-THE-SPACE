@@ -1,6 +1,7 @@
 package com.example.sevak.themaze;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -97,6 +100,14 @@ public class MazeBuilder extends AppCompatActivity {
                         public void onClick(View view) {
                             Mazik.name = et.getText().toString();
                             MazeHolder.MazeArr.add(Mazik);
+
+                            Gson gson = new Gson();
+                            SharedPreferences sharedPreferencesForMholder;
+                            sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
+                            SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+                            ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+                            ed.apply();
+
                             Toast t = Toast.makeText(getApplicationContext(), "A maze has been created", Toast.LENGTH_SHORT);
                             t.show();
                             et.setVisibility(View.GONE);
@@ -118,7 +129,7 @@ public class MazeBuilder extends AppCompatActivity {
                         ArrayList<Integer> tpAr = new ArrayList<Integer>();
                         tpAr.add(i);
                         for (Integer j : tp_num.values()) {
-                            if ((((int) (i / 100)) == ((int) (j / 100))) && (i != j)){
+                            if ((((int) (i / 100)) == ((int) (j / 100))) && (!i.equals(j))){
                                 tpAr.add(j);
                             }
                         }
@@ -175,9 +186,9 @@ public class MazeBuilder extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if (thisView.findViewWithTag(String.valueOf(finalI)) == null) {
-                        if ((finalI == 15) && (checkWAS(finalI) == null)) {
+                        int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                        if ((finalI == 15) && (checkWAS(finalI, cordin))) {
                             if (!hospitalPlaced) {
-                                int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                 TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 1)] = HOSPITAL;
                                 ImageView iv = (ImageView) addl.getChildAt(finalI);
                                 ImageView imageView = new ImageView(thisView.getContext());
@@ -190,9 +201,8 @@ public class MazeBuilder extends AppCompatActivity {
                                 t.show();
                             }
                         } else {
-                            if ((finalI == 18)  && (checkWAS(finalI) == null)) {
+                            if ((finalI == 18)  && (checkWAS(finalI, cordin))) {
                                 if (!keyPlaced) {
-                                    int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                     TMaze[cordin[0] * 2 + 1][(cordin[1] * 2 + 1)] = KEY;
                                     ImageView iv = (ImageView) addl.getChildAt(finalI);
                                     ImageView imageView = new ImageView(thisView.getContext());
@@ -205,9 +215,8 @@ public class MazeBuilder extends AppCompatActivity {
                                     t.show();
                                 }
                             } else {
-                                if ((finalI == 9) && (checkWAS(finalI) == null)) {
+                                if ((finalI == 9) && (checkWAS(finalI, cordin))) {
                                     if (!IamPlaced) {
-                                        int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
                                         BC[0] = cordin[0] * 2 + 1;
                                         BC[1] = (cordin[1] * 2 + 1);
                                         ImageView iv = (ImageView) addl.getChildAt(finalI);
@@ -223,8 +232,7 @@ public class MazeBuilder extends AppCompatActivity {
                                 } else {
                                     if (finalI >= 10 && finalI <= 13) {
                                         if (!exitPlaced) {
-                                            if (wallcheck()) {
-                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                            if (wallcheck(finalI, cordin)) {
                                                 switch (finalI) {
                                                     case 10: {
                                                         TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 2;
@@ -250,7 +258,7 @@ public class MazeBuilder extends AppCompatActivity {
                                                 thisView.addView(imageView);
                                                 exitPlaced = true;
                                             } else {
-                                                Toast t = Toast.makeText(getApplicationContext(), "can't place", Toast.LENGTH_SHORT);
+                                                Toast t = Toast.makeText(getApplicationContext(), "can't place exit", Toast.LENGTH_SHORT);
                                                 t.show();
                                             }
                                         } else {
@@ -259,8 +267,7 @@ public class MazeBuilder extends AppCompatActivity {
                                         }
                                     } else {
                                         if ((((finalI >= 0) && (finalI < 2)) || ((finalI >= 6) && (finalI < 8)))) {
-                                            if (exitcheck()) {
-                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                            if (exitcheck(finalI, cordin)) {
                                                 switch (finalI) {
                                                     case 0: {
                                                         TMaze[cordin[0] * 2][(cordin[1] * 2 + 1)] = 1;
@@ -285,12 +292,11 @@ public class MazeBuilder extends AppCompatActivity {
                                                 imageView.setTag(String.valueOf(finalI));
                                                 thisView.addView(imageView);
                                             } else {
-                                                Toast t = Toast.makeText(getApplicationContext(), "can't place", Toast.LENGTH_SHORT);
+                                                Toast t = Toast.makeText(getApplicationContext(), "can't place wall", Toast.LENGTH_SHORT);
                                                 t.show();
                                             }
                                         } else {
-                                            if ((checkWAS(finalI) == null)) {
-                                                final int[] cordin = new int[]{Integer.parseInt(thisView.getTag().toString().split(" ")[0]), Integer.parseInt(thisView.getTag().toString().split(" ")[1])};
+                                            if ((checkWAS(finalI, cordin))) {
                                                 switch (finalI) {
                                                     case 2: {
                                                         TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 12;
@@ -309,6 +315,7 @@ public class MazeBuilder extends AppCompatActivity {
                                                         break;
                                                     }
                                                     case 8: {
+                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 100;
                                                         final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
                                                         final EditText et = new EditText(rl.getContext());
                                                         RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
@@ -394,40 +401,41 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                 }
 
-                private boolean wallcheck() {
-                    ImageView res;
-                    res = null;
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(0)) != null && ((finalI - 10) == 0)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(0));
+                private boolean wallcheck(int finalI, int[] cord) {
+                    boolean res;
+                    res = true;
+                    if ((TMaze[cord[0]*2][cord[1]*2+1] != 0) && ((finalI - 10) == 0)) {
+                        res = false;
                     }
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(1)) != null && ((finalI - 10) == 2)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(1));
+                    if ((TMaze[cord[0]*2+2][cord[1]*2+1] != 0) && ((finalI - 10) == 2)) {
+                        res = false;
                     }
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(6)) != null && ((finalI - 10) == 3)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(6));
-                    }if ((ImageView) thisView.findViewWithTag(String.valueOf(7)) != null && ((finalI - 10) == 1)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(7));
+                    if ((TMaze[cord[0]*2+1][cord[1]*2] != 0) && ((finalI - 10) == 3)) {
+                        res = false;
                     }
-                    return (res == null);
+                    if ((TMaze[cord[0]*2+1][cord[1]*2+2] != 0) && ((finalI - 10) == 1)) {
+                        res = false;
+                    }
+                    return res;
                 }
 
-                private boolean exitcheck() {
-                    ImageView res;
-                    res = null;
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(10)) != null && ((finalI + 10) == 10)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(10));
+                private boolean exitcheck(int finalI, int[] cord) {
+                    boolean res;
+                    res = true;
+                    if ((TMaze[cord[0]*2][cord[1]*2+1] != 0) && (finalI == 0)) {
+                        res = false;
                     }
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(12)) != null && ((finalI + 10) == 11)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(12));
+                    if ((TMaze[cord[0]*2+2][cord[1]*2+1] != 0) && (finalI == 1)) {
+                        res = false;
                     }
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(13)) != null && ((finalI + 6) == 12)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(13));
+                    if ((TMaze[cord[0]*2+1][cord[1]*2] != 0) && ((finalI + 6) == 12)) {
+                        res = false;
                     }
-                    if ((ImageView) thisView.findViewWithTag(String.valueOf(11)) != null && ((finalI + 6) == 13)) {
-                        res = (ImageView) thisView.findViewWithTag(String.valueOf(11));
+                    if ((TMaze[cord[0]*2+1][cord[1]*2+2] != 0) && ((finalI + 6) == 13)) {
+                        res = false;
                     }
 
-                    return (res == null);
+                    return res;
                 }
 
                 private Integer tryParse(String text) {
@@ -440,24 +448,11 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                 }
 
-                private ImageView checkWAS(int finalI) {
-                    ImageView res;
-                    res = null;
-                    for (int j = 2; j < 6; j++) {
-                        if ((ImageView) thisView.findViewWithTag(String.valueOf(j)) != null) {
-                            res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
-                        }
-                    }
-                    for (int j = 8; j < 10; j++) {
-                        if ((ImageView) thisView.findViewWithTag(String.valueOf(j)) != null) {
-                            res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
-                        }
-                    }
-
-                    for (int j = 14; j < addl.getChildCount(); j++) {
-                        if ((ImageView) thisView.findViewWithTag(String.valueOf(j)) != null) {
-                            res = (ImageView) thisView.findViewWithTag(String.valueOf(j));
-                        }
+                private Boolean checkWAS(int finalI, int[] cord) {
+                    Boolean res;
+                    res = true;
+                    if (TMaze[cord[0]*2+1][cord[1]*2+1] != 0) {
+                        res = false;
                     }
                     return res;
                 }
