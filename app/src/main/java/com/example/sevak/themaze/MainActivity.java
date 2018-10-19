@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MazeHolder.init();
+        MazeHolder.init(getApplicationContext());
 
         ImageView start = (ImageView) findViewById(R.id.StartGame);
         start.setOnClickListener(new View.OnClickListener() {

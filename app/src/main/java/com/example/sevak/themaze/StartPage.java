@@ -12,8 +12,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 public class StartPage extends AppCompatActivity {
@@ -63,6 +65,7 @@ public class StartPage extends AppCompatActivity {
         CurBasicCord[0] = Maze.YourCordInMaze[0];
         CurBasicCord[1] = Maze.YourCordInMaze[1];
         changeIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras, R.id.Me);
+        changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
 
@@ -71,6 +74,8 @@ public class StartPage extends AppCompatActivity {
             public boolean onDrag(View view, DragEvent dragEvent) {
                 ImageView iv = (ImageView) findViewById(R.id.Trash_Can);
                 View view1 = (View) dragEvent.getLocalState();
+                ScrollView vv = (ScrollView) findViewById(R.id.VV);
+                HorizontalScrollView hv = (HorizontalScrollView) findViewById(R.id.HV);
                 switch (dragEvent.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         // do nothing
@@ -80,7 +85,7 @@ public class StartPage extends AppCompatActivity {
                     case DragEvent.ACTION_DRAG_EXITED:
                         break;
                     case DragEvent.ACTION_DROP:
-                        if ((dragEvent.getX() >= iv.getX()) && (dragEvent.getX() <= (iv.getX() + iv.getWidth())) && (dragEvent.getY() >= iv.getY()) && (dragEvent.getY() <= (iv.getY() + iv.getHeight()))) {
+                        if ((dragEvent.getX() >= -hv.getX()+iv.getX()+hv.getScrollX()) && (dragEvent.getX() <= (-hv.getX()+iv.getX()+hv.getScrollX() + iv.getWidth())) && (dragEvent.getY() >= -hv.getY()+iv.getY()+vv.getScrollY()) && (dragEvent.getY() <= (-hv.getY()+iv.getY()+vv.getScrollY() + iv.getHeight()))) {
                             if (!view1.getTag().equals ("p"+NativeLayout+"l")) {
                                 deleteLayout((String) view1.getTag());
                             }
@@ -192,6 +197,8 @@ public class StartPage extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+                ImageView iv = (ImageView) findViewById(R.id.Trash_Can);
+                iv.setVisibility(View.GONE);
                 goToThisLayout(1);
             }
         });
@@ -201,6 +208,8 @@ public class StartPage extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+                ImageView iv = (ImageView) findViewById(R.id.Trash_Can);
+                iv.setVisibility(View.VISIBLE);
                 goToThisLayout(0);
             }
         });
@@ -423,8 +432,8 @@ public class StartPage extends AppCompatActivity {
         ConstraintLayout container = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout Rlc = new RelativeLayout(this);
         Rlc.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorLightGreen));
-        String idStr1c = "p" + layoutAmount.toString() + "l";
-        Rlc.setId(getResources().getIdentifier(idStr1c, "id", getPackageName()));
+        String nameStr1c = "p" + layoutAmount.toString() + "ln";
+        Rlc.setTag(nameStr1c);
         Rlc.setClickable(true);
         ConstraintLayout.LayoutParams rules1c = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
@@ -494,16 +503,17 @@ public class StartPage extends AppCompatActivity {
 
     private void deleteLayout(String res) {
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
-        l.removeView(findViewById(getResources().getIdentifier(res, "id", getPackageName())));
+        l.removeView(l.findViewWithTag((res+"n")));
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
         layout.removeView(layout.findViewWithTag(res));
     }
 
     private void goToThisLayout(Integer LayoutNumber) {
-        String tid = "p" + ThisLayout.toString() + "l";
-        String cid = "p" + LayoutNumber.toString() + "l";
-        RelativeLayout thisL = (RelativeLayout) findViewById(getResources().getIdentifier(tid, "id", getPackageName()));
-        RelativeLayout changeL = (RelativeLayout) findViewById(getResources().getIdentifier(cid, "id", getPackageName()));
+        ConstraintLayout mlay = (ConstraintLayout) findViewById(R.id.Container);
+        String tname = "p" + ThisLayout.toString() + "ln";
+        String cname = "p" + LayoutNumber.toString() + "ln";
+        RelativeLayout thisL = (RelativeLayout) mlay.findViewWithTag(tname);
+        RelativeLayout changeL = (RelativeLayout) mlay.findViewWithTag(cname);
         thisL.setVisibility(View.GONE);
         changeL.setVisibility(View.VISIBLE);
         ThisLayout = LayoutNumber;
@@ -792,8 +802,8 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void delView(View view){
-        RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l",
-                "id", getPackageName()));
+        ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
+        RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         layout.removeView(view);
     }
 
@@ -820,7 +830,8 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void changeIdCell(int[] cord, int cellType, int ident) {
-        RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l", "id", getPackageName()));
+        ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
+        RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);
         imageView.setId(ident);
         imageView.setImageResource(cellType);
@@ -831,7 +842,8 @@ public class StartPage extends AppCompatActivity {
         layout.addView(imageView, rules);
     }
     private void changeCell(int[] cord, int cellType) {
-        RelativeLayout layout = (RelativeLayout) findViewById(getResources().getIdentifier("p"+NativeLayout.toString()+"l", "id", getPackageName()));
+        ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
+        RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);
         imageView.setImageResource(cellType);
         RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(

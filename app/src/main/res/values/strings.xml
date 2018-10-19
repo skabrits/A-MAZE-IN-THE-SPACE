@@ -4,4 +4,6 @@
     <string name="menu">Menu</string>
     <string name="todo">TODO</string>
     <string name="title_activity_maze_builder">MazeBuilder</string>
+    <string name="add_element">Add element</string>
+    <string name="delete_element">Delete Element</string>
 </resources>
