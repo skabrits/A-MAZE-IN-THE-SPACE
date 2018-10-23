@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +37,12 @@ import static com.example.sevak.themaze.StartPage.OFFSET_TOP;
 
 public class MazeBuilder extends AppCompatActivity {
 
+    private float ConvDPtoPX(float dp){
+        DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
+        return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    int Cellsize = (int) ConvDPtoPX(1)*41;
     private GestureDetector mDetector;
     private RelativeLayout thisView;
     private Integer[][] TMaze = new Integer[21][21];
@@ -724,7 +731,7 @@ public class MazeBuilder extends AppCompatActivity {
             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
-            rules.setMargins(OFFSET_LEFT + CELLSIZE * i, OFFSET_TOP + CELLSIZE * (Integer.parseInt(hc.getText().toString()) - 1), 100, 100);
+            rules.setMargins(OFFSET_LEFT + Cellsize * i, OFFSET_TOP + Cellsize * (Integer.parseInt(hc.getText().toString()) - 1), 100, 100);
             layout.addView(relativeLayout, rules);
         }
     }
@@ -750,7 +757,7 @@ public class MazeBuilder extends AppCompatActivity {
             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
-            rules.setMargins(OFFSET_LEFT +CELLSIZE * (Integer.parseInt(wc.getText().toString()) - 1), OFFSET_TOP +CELLSIZE * i, 100, 100);
+            rules.setMargins(OFFSET_LEFT +Cellsize * (Integer.parseInt(wc.getText().toString()) - 1), OFFSET_TOP +CELLSIZE * i, 100, 100);
             layout.addView(relativeLayout, rules);
         }
     }

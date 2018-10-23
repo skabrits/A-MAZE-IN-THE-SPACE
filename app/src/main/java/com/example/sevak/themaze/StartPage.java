@@ -19,6 +19,13 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 public class StartPage extends AppCompatActivity {
+
+    private GestureDetector mDetector;
+    private float ConvDPtoPX(float dp){
+        DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
+        return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
     public static final int CELLSIZE = 140;
     public static final int TURN_NA = 0;
     public static final int TURN_UP = 1;
@@ -44,11 +51,6 @@ public class StartPage extends AppCompatActivity {
     private Boolean isAnYweapon = false;
     private Boolean isAnYkey = false;
 
-    private GestureDetector mDetector;
-    private float ConvDPtoPX(float dp){
-        DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
-        return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-    }
     private int[] zerocor = new int[2];
     private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
@@ -57,6 +59,8 @@ public class StartPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
+
+        int Cellsize = (int) ConvDPtoPX(1)*41;
 
         Maze.init();
         ImageView c1 = (ImageView) findViewById(R.id.C1);
@@ -89,17 +93,17 @@ public class StartPage extends AppCompatActivity {
                             if (!view1.getTag().equals ("p"+NativeLayout+"l")) {
                                 deleteLayout((String) view1.getTag());
                             }
-                        } else if ((dragEvent.getX() >= OFFSET_LEFT) && (dragEvent.getX() <= (OFFSET_LEFT + Maze.SIZE_X*CELLSIZE)) && (dragEvent.getY() >= OFFSET_TOP) && (dragEvent.getY() <= (OFFSET_TOP + Maze.SIZE_Y*CELLSIZE))) {
+                        } else if ((dragEvent.getX() >= OFFSET_LEFT) && (dragEvent.getX() <= (OFFSET_LEFT + Maze.SIZE_X*Cellsize)) && (dragEvent.getY() >= OFFSET_TOP) && (dragEvent.getY() <= (OFFSET_TOP + Maze.SIZE_Y*Cellsize))) {
                             view1.bringToFront();
                             view1.animate()
-                                    .x(((int)(dragEvent.getX() - OFFSET_LEFT) / CELLSIZE)*CELLSIZE + OFFSET_LEFT - (Maze.SIZE_X - 1) * CELLSIZE)
-                                    .y(((int)(dragEvent.getY() - OFFSET_TOP) / CELLSIZE)*CELLSIZE + OFFSET_TOP - (Maze.SIZE_Y - 1) * CELLSIZE)
+                                    .x(((int)(dragEvent.getX() - OFFSET_LEFT) / Cellsize)*Cellsize + OFFSET_LEFT - (Maze.SIZE_X - 1) * Cellsize)
+                                    .y(((int)(dragEvent.getY() - OFFSET_TOP) / Cellsize)*Cellsize + OFFSET_TOP - (Maze.SIZE_Y - 1) * Cellsize)
                                     .setDuration(700)
                                     .start();
                         } else {
                             view1.animate()
-                                    .x(dragEvent.getX() - (Maze.SIZE_X - 1) * CELLSIZE)
-                                    .y(dragEvent.getY() - (Maze.SIZE_Y - 1) * CELLSIZE)
+                                    .x(dragEvent.getX() - (Maze.SIZE_X - 1) * Cellsize)
+                                    .y(dragEvent.getY() - (Maze.SIZE_Y - 1) * Cellsize)
                                     .setDuration(700)
                                     .start();
                         }
@@ -147,14 +151,14 @@ public class StartPage extends AppCompatActivity {
                         ConstraintLayout.LayoutParams.WRAP_CONTENT,
                         ConstraintLayout.LayoutParams.WRAP_CONTENT);
                 imageView.setAlpha(50);
-                rules.setMargins(OFFSET_LEFT +CELLSIZE*j, OFFSET_TOP +CELLSIZE*i, 0, 0);
+                rules.setMargins(OFFSET_LEFT +Cellsize*j, OFFSET_TOP +Cellsize*i, 0, 0);
                 layout.addView(imageView, rules);
             }
         }
 
         layout.findViewWithTag("p1l").getBackground().setAlpha(0);
         ViewGroup.MarginLayoutParams trules1 = (ViewGroup.MarginLayoutParams) layout.findViewWithTag("p1l").getLayoutParams();
-        trules1.setMargins(OFFSET_LEFT - CELLSIZE, (int) (OFFSET_TOP + CELLSIZE * Maze.SIZE_Y + OFFSET_BETWEEN), 0, 0);
+        trules1.setMargins(OFFSET_LEFT - Cellsize, (int) (OFFSET_TOP + Cellsize * Maze.SIZE_Y + OFFSET_BETWEEN), 0, 0);
         layout.findViewWithTag("p1l").requestLayout();
 
         final RelativeLayout relativeLayout = (RelativeLayout) layout.findViewWithTag("p1l");
@@ -177,7 +181,7 @@ public class StartPage extends AppCompatActivity {
 
         ImageView imageView = (ImageView) relativeLayout.findViewWithTag("C1");
         ViewGroup.MarginLayoutParams trules1c = (ViewGroup.MarginLayoutParams) imageView.getLayoutParams();
-        trules1c.setMargins((Maze.SIZE_X - 1) * CELLSIZE, (Maze.SIZE_Y - 1) * CELLSIZE, 0, 0);
+        trules1c.setMargins((Maze.SIZE_X - 1) * Cellsize, (Maze.SIZE_Y - 1) * Cellsize, 0, 0);
         imageView.requestLayout();
 
         RelativeLayout touch = (RelativeLayout) findViewById(R.id.p1l);
@@ -229,12 +233,13 @@ public class StartPage extends AppCompatActivity {
 
         @Override
         public void onLongPress(MotionEvent e) {
+            int Cellsize = (int) ConvDPtoPX(1)*41;
             int x = (int)e.getX();
             int y = (int)e.getY();
-            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * CELLSIZE/2;
-            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * CELLSIZE/2;
-            int xin = (x>curx + CELLSIZE) ? 1 : ((x<curx) ? -1 : 0);
-            int yin = (y>cury + CELLSIZE) ? 1 : ((y<cury) ? -1 : 0);
+            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
+            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * Cellsize/2;
+            int xin = (x>curx + Cellsize) ? 1 : ((x<curx) ? -1 : 0);
+            int yin = (y>cury + Cellsize) ? 1 : ((y<cury) ? -1 : 0);
             if (xin < 0) {
                 if (yin == 0)
                     shoot(TURN_LEFT);
@@ -254,12 +259,13 @@ public class StartPage extends AppCompatActivity {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            int Cellsize = (int) ConvDPtoPX(1)*41;
             int x = (int)e.getX();
             int y = (int)e.getY();
-            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * CELLSIZE/2;
-            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * CELLSIZE/2;
-            int xin = (x>curx + CELLSIZE) ? 1 : ((x<curx) ? -1 : 0);
-            int yin = (y>cury + CELLSIZE) ? 1 : ((y<cury) ? -1 : 0);
+            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
+            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * Cellsize/2;
+            int xin = (x>curx + Cellsize) ? 1 : ((x<curx) ? -1 : 0);
+            int yin = (y>cury + Cellsize) ? 1 : ((y<cury) ? -1 : 0);
             if (xin < 0) {
                 if (yin == 0)
                     turn(TURN_LEFT);
@@ -420,6 +426,7 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void prepareNEWlayout() {
+        int Cellsize = (int) ConvDPtoPX(1)*41;
         int[][] YourMaze = new int[Maze.YourMaze.length][Maze.YourMaze[1].length];
         for (int i = 0; i < YourMaze.length; i++) {
             for (int j = 0; j < YourMaze[1].length; j++) {
@@ -464,7 +471,7 @@ public class StartPage extends AppCompatActivity {
         ConstraintLayout.LayoutParams rules1 = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules1.setMargins(OFFSET_LEFT - CELLSIZE, (int) (OFFSET_TOP + (layoutAmount + 1) * (CELLSIZE * Maze.SIZE_Y + OFFSET_BETWEEN)),
+        rules1.setMargins(OFFSET_LEFT - Cellsize, (int) (OFFSET_TOP + (layoutAmount + 1) * (Cellsize * Maze.SIZE_Y + OFFSET_BETWEEN)),
                 0, 100);
 
         Rl.setTag(idStr1);
@@ -493,7 +500,7 @@ public class StartPage extends AppCompatActivity {
         RelativeLayout.LayoutParams rules2 = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules2.setMargins(CELLSIZE * (Maze.SIZE_X - 1), CELLSIZE * (Maze.SIZE_Y -1), 0, 100);
+        rules2.setMargins(Cellsize * (Maze.SIZE_X - 1), Cellsize * (Maze.SIZE_Y -1), 0, 100);
         Rl.addView(imageView, rules2);
         ImageView me = new ImageView(this);
         me.setId(R.id.Mec);
@@ -808,6 +815,7 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void changeTagIdCell(int[] cord, int cellType) {
+        int Cellsize = (int) ConvDPtoPX(1)*41;
         RelativeLayout subLayoutInGlobal = (RelativeLayout) findViewById(R.id.p0l).findViewWithTag("p"+NativeLayout.toString()+"l");
         ImageView imageViewc = new ImageView(this);
         imageViewc.setId(R.id.Mec);
@@ -819,17 +827,18 @@ public class StartPage extends AppCompatActivity {
         int x = (int) v.getX();
         int y = (int) v.getY();
         if (x==0 && y==0) {
-            x = (Maze.SIZE_X - 1) * CELLSIZE;
-            y = (Maze.SIZE_Y - 1) * CELLSIZE;
+            x = (Maze.SIZE_X - 1) * Cellsize;
+            y = (Maze.SIZE_Y - 1) * Cellsize;
         }
         rulesc.setMargins(
-                (int) (x - (CurBasicCord[1] - cord[1]) * CELLSIZE/2),
-                (int) (y - (CurBasicCord[0] - cord[0]) * CELLSIZE/2),
+                (int) (x - (CurBasicCord[1] - cord[1]) * Cellsize/2),
+                (int) (y - (CurBasicCord[0] - cord[0]) * Cellsize/2),
                 0, 100);
         subLayoutInGlobal.addView(imageViewc, rulesc);
     }
 
     private void changeIdCell(int[] cord, int cellType, int ident) {
+        int Cellsize = (int) ConvDPtoPX(1)*41;
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);
@@ -838,10 +847,11 @@ public class StartPage extends AppCompatActivity {
         RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * CELLSIZE/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * CELLSIZE/2, 0, 0);
+        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * Cellsize/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * Cellsize/2, 0, 0);
         layout.addView(imageView, rules);
     }
     private void changeCell(int[] cord, int cellType) {
+        int Cellsize = (int) ConvDPtoPX(1)*41;
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);
@@ -849,7 +859,7 @@ public class StartPage extends AppCompatActivity {
         RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * CELLSIZE/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * CELLSIZE/2, 1000, 1000);
+        rules.setMargins((int) zerocor[1] - (CurBasicCord[1] - cord[1]) * Cellsize/2, (int) zerocor[0] - (CurBasicCord[0] - cord[0]) * Cellsize/2, 1000, 1000);
         layout.addView(imageView, rules);
         ImageView iv = (ImageView) findViewById(R.id.Me);
         delView(iv);
@@ -865,12 +875,12 @@ public class StartPage extends AppCompatActivity {
         int x = (int) v.getX();
         int y = (int) v.getY();
         if (x==0 && y==0) {
-            x = (Maze.SIZE_X - 1) * CELLSIZE;
-            y = (Maze.SIZE_Y - 1) * CELLSIZE;
+            x = (Maze.SIZE_X - 1) * Cellsize;
+            y = (Maze.SIZE_Y - 1) * Cellsize;
         }
         rulesc.setMargins(
-                (int) (x - (CurBasicCord[1] - cord[1]) * CELLSIZE/2),
-                (int) (y - (CurBasicCord[0] - cord[0]) * CELLSIZE/2),
+                (int) (x - (CurBasicCord[1] - cord[1]) * Cellsize/2),
+                (int) (y - (CurBasicCord[0] - cord[0]) * Cellsize/2),
                 100, 100);
         subLayoutInGlobal.addView(imageViewc, rulesc);
         ImageView ivc = (ImageView) findViewById(R.id.Mec);
