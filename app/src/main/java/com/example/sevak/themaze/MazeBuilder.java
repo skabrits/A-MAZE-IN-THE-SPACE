@@ -1,6 +1,5 @@
 package com.example.sevak.themaze;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +18,10 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.example.sevak.themaze.StartPage.BFG;
 import static com.example.sevak.themaze.StartPage.BULLET;
@@ -42,7 +39,6 @@ public class MazeBuilder extends AppCompatActivity {
         return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
-    int Cellsize = (int) ConvDPtoPX(1)*41;
     private GestureDetector mDetector;
     private RelativeLayout thisView;
     private Integer[][] TMaze = new Integer[21][21];
@@ -61,6 +57,7 @@ public class MazeBuilder extends AppCompatActivity {
         setContentView(R.layout.activity_maze_builder);
 
         findViewById(R.id.TheBegin).getBackground().setAlpha(255);
+        int Cellsize = (int) ConvDPtoPX(1)*41;
 
         BC = new int[] {1, 1};
 
@@ -322,8 +319,10 @@ public class MazeBuilder extends AppCompatActivity {
                                                         break;
                                                     }
                                                     case 8: {
-                                                        TMaze[(cordin[0] * 2 + 1)][(cordin[1] * 2 + 1)] = 100;
                                                         final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
+                                                        for (int j = 0; j < rl.getChildCount(); j++) {
+                                                            rl.getChildAt(j).setClickable(false);
+                                                        }
                                                         final EditText et = new EditText(rl.getContext());
                                                         RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
                                                                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -354,6 +353,9 @@ public class MazeBuilder extends AppCompatActivity {
                                                                     imageView.setImageDrawable(iv.getDrawable());
                                                                     imageView.setTag(String.valueOf(finalI));
                                                                     thisView.addView(imageView);
+                                                                    for (int j = 0; j < rl.getChildCount(); j++) {
+                                                                        rl.getChildAt(j).setClickable(true);
+                                                                    }
                                                                     rl.removeView(et);
                                                                     rl.removeView(bt);
                                                                 } else {
@@ -518,7 +520,7 @@ public class MazeBuilder extends AppCompatActivity {
             public void onClick(View view) {
                 if (Integer.parseInt(wc.getText().toString()) < 10) {
                     wc.setText(String.valueOf(Integer.parseInt(wc.getText().toString()) + 1));
-                    addcol();
+                    addcol(Cellsize);
                 }
             }
         });
@@ -544,7 +546,7 @@ public class MazeBuilder extends AppCompatActivity {
             public void onClick(View view) {
                 if (Integer.parseInt(hc.getText().toString()) < 10) {
                     hc.setText(String.valueOf(Integer.parseInt(hc.getText().toString()) + 1));
-                    addline();
+                    addline(Cellsize);
                 }
             }
         });
@@ -710,7 +712,7 @@ public class MazeBuilder extends AppCompatActivity {
         thisView = rl;
     }
 
-    private void addline() {
+    private void addline(int Cellsize) {
         TextView wc = (TextView) findViewById(R.id.WCounter);
         TextView hc = (TextView) findViewById(R.id.HCounter);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
@@ -736,7 +738,7 @@ public class MazeBuilder extends AppCompatActivity {
         }
     }
 
-    private void addcol() {
+    private void addcol(int Cellsize) {
         TextView wc = (TextView) findViewById(R.id.WCounter);
         TextView hc = (TextView) findViewById(R.id.HCounter);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
@@ -757,7 +759,7 @@ public class MazeBuilder extends AppCompatActivity {
             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
-            rules.setMargins(OFFSET_LEFT +Cellsize * (Integer.parseInt(wc.getText().toString()) - 1), OFFSET_TOP +CELLSIZE * i, 100, 100);
+            rules.setMargins(OFFSET_LEFT +Cellsize * (Integer.parseInt(wc.getText().toString()) - 1), OFFSET_TOP +Cellsize * i, 100, 100);
             layout.addView(relativeLayout, rules);
         }
     }
