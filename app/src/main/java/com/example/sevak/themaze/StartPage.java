@@ -50,7 +50,7 @@ public class StartPage extends AppCompatActivity {
     private Integer bulletAmount = 0;
     private Boolean isAnYweapon = false;
     private Boolean isAnYkey = false;
-
+//TODO: merge current location and global map pages
     private int[] zerocor = new int[2];
     private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
@@ -586,6 +586,7 @@ public class StartPage extends AppCompatActivity {
             }
         }
     }
+    //TODO: simplify walking interface (triangle areas instead of rectangles)
     private void go(int[] cord, int side){
         boolean b = false;
         switch (side){
