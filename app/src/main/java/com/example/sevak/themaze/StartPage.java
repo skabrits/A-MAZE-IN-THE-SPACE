@@ -401,7 +401,12 @@ public class StartPage extends AppCompatActivity {
         Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
         changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
     }
-
+//TODO: waitin g before teleporting to draw everything
+//    try {
+//        Thread.sleep(500);
+//    } catch (InterruptedException e) {
+//        e.printStackTrace();
+//    }
     private void moveTOnewlayout() {
         ImageView iMv = (ImageView) findViewById(R.id.Me);
         delView(iMv);
@@ -698,7 +703,7 @@ public class StartPage extends AppCompatActivity {
             bulletAmount += 1;
         }
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == USED_BULLET) {
-            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
+            //changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
         }
     }
 
@@ -713,6 +718,8 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void die(int[] yourCordInMaze) {
+        Toast t = Toast.makeText(getApplicationContext(), "You were killed", Toast.LENGTH_SHORT);
+        t.show();
         moveTOnewlayout();
         Maze.YourCordInMaze[0] = Maze.hospital.get(HOSPITAL)[0];
         Maze.YourCordInMaze[1] = Maze.hospital.get(HOSPITAL)[1];

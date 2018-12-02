@@ -33,5 +33,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), MazeBuilder.class));
             }
         });
+        ImageView multiplayer = (ImageView) findViewById(R.id.StartMultiplayer);
+        multiplayer.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), Client.class));
+            }
+        });
     }
 }

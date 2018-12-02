@@ -1,0 +1,5 @@
+Server protocol:
+
+//your_turn: [maze] [mycords] event(set{[players_cords]} #dead players# / alive)
+//next_turn: [maze] event(dead / alive)
+//maze_nom: int
