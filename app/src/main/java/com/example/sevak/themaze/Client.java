@@ -53,6 +53,7 @@ import static com.example.sevak.themaze.MazeHolder.sharedPreferencesForMholder;
 
 public class Client extends AppCompatActivity {
 
+    private int[] keyCords = new int[] {-1, -1};
     private Set<List<Integer>> killstreat = new HashSet<List<Integer>>();
 
     private int chmap = -1;
@@ -158,7 +159,7 @@ public class Client extends AppCompatActivity {
                 try {
                     Gson gson = new Gson();
                     Thread.sleep(3000);
-                    socketWriter.write("\\\\maze_nom: " + gson.toJson((MazeExample) (MazeHolder.MazeArr.get(Maze.rand)))); //пишем строку пользователя
+                    socketWriter.write("\\\\maze_nom://////" + gson.toJson((MazeExample) (MazeHolder.MazeArr.get(Maze.rand)))); //пишем строку пользователя
                     socketWriter.write("\n"); //добавляем "новою строку", дабы readLine() сервера сработал
                     socketWriter.flush(); // отправляем
                 } catch (IOException e) {
@@ -183,7 +184,7 @@ public class Client extends AppCompatActivity {
                 isSent = true;
                 Gson gson = new Gson();
                 try {
-                    socketWriter.write("\\\\next_turn://////" + gson.toJson(Maze.Maze) + "//////" + gson.toJson(Arrays.asList( Arrays.stream( Maze.YourCordInMaze ).boxed().toArray( Integer[]::new ))) + "//////" + gson.toJson(killstreat)); //пишем строку пользователя
+                    socketWriter.write("\\\\next_turn://////" + gson.toJson(Maze.Maze) + "//////" + gson.toJson(Arrays.asList( Arrays.stream( Maze.YourCordInMaze ).boxed().toArray( Integer[]::new ))) + "//////" + gson.toJson(killstreat) + "//////" + isAnYkey); //пишем строку пользователя
                     socketWriter.write("\n"); //добавляем "новою строку", дабы readLine() сервера сработал
                     socketWriter.flush(); // отправляем
                     killstreat.clear();
@@ -254,22 +255,28 @@ public class Client extends AppCompatActivity {
 //                            line = socketReader.readLine();
 //                        } catch (IOException e) {}
 //                    }
-                } else if (line.split(" ")[0].equals("\\\\your_turn:")) {
+                } else if (line.split("//////")[0].equals("\\\\your_turn:")) {
                     isMyTurn = true;
                     isSent = false;
                     Gson gson = new Gson();
                     Type type = new TypeToken<int[][]>() {}.getType();
-                    Maze.Maze = gson.fromJson(line.split(" ")[1], type);
-                    if (line.split(" ")[2].equals("dead")){
+                    Maze.Maze = gson.fromJson(line.split("//////")[1], type);
+                    if (line.split("//////")[2].equals("dead")){
                         isDead = true;
                     }
-                } else if (line.split(" ")[0].equals("\\\\maze_nom:")) {
+                    if (line.split("//////").length > 3){
+                        type = new TypeToken<int[]>() {}.getType();
+                        keyCords = gson.fromJson(line.split("//////")[3],type);
+                    } else {
+                        keyCords = new int[] {-1, -1};
+                    }
+                } else if (line.split("//////")[0].equals("\\\\maze_nom:")) {
                     isMazegot = true;
                     Gson gson = new Gson();
-                    MazeHolder.MazeArr.add(gson.fromJson(line.substring(line.split(" ")[0].length() + 1), MazeExample.class));
+                    MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
                     Mazenom = MazeHolder.MazeArr.size() - 1;
-                } else if (line.split(" ")[0].equals("\\\\amaze_nom:")) {
-                    if (line.split(" ")[1].equals("okay")) {
+                } else if (line.split("//////")[0].equals("\\\\amaze_nom:")) {
+                    if (line.split("//////")[1].equals("okay")) {
                         ServnotgotMazenom = false;
                     }
                 } else { // иначе печатаем то, что прислал сервер.
@@ -895,7 +902,6 @@ public class Client extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void goforBullet(int[] cord, int side) {
-        killstreat.add(Arrays.asList( Arrays.stream( Bulletcoord ).boxed().toArray( Integer[]::new )));
         switch (side) {
             case 1: {
                 if (Maze.Maze[cord[0] - 2][cord[1]] == MINOTAUR) {
@@ -926,6 +932,7 @@ public class Client extends AppCompatActivity {
                 break;
             }
         }
+        killstreat.add(Arrays.asList( Arrays.stream( Bulletcoord ).boxed().toArray( Integer[]::new )));
     }
 
     private void teleport(int[] cord) {
@@ -1207,15 +1214,15 @@ public class Client extends AppCompatActivity {
         ImageView ivc = (ImageView) findViewById(R.id.Mec);
         delTagView(ivc);
         changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
+        if (Maze.isKey) {
+            checkKEY();
+        }
         checkTheRvrORtp();
         checkMinotaur();
         checkBullet();
         checkHospital();
         if (Maze.isWeapon) {
             checkBFG();
-        }
-        if (Maze.isKey) {
-            checkKEY();
         }
     }
 
@@ -1229,6 +1236,9 @@ public class Client extends AppCompatActivity {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == KEY) {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.key);
             Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 0;
+            isAnYkey = true;
+        } else if ((Maze.YourCordInMaze[0] == keyCords[0] && Maze.YourCordInMaze[1] == keyCords[1])) {
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.key);
             isAnYkey = true;
         }
     }
@@ -1264,6 +1274,7 @@ public class Client extends AppCompatActivity {
     }
 
     private void die(int[] yourCordInMaze) {
+        isAnYkey = false;
         Toast t = Toast.makeText(getApplicationContext(), "You were killed", Toast.LENGTH_SHORT);
         t.show();
         moveTOnewlayout();

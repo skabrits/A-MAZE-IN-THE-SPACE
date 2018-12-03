@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,13 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.example.sevak.themaze.Maze.hospital;
+import static com.example.sevak.themaze.StartPage.HOSPITAL;
+import static com.example.sevak.themaze.StartPage.KEY;
+
 public class Server {
+    private Socket keyOwner = null;
+    private int[] keyCords = new int[2];
     private HashMap<Socket, List<Integer>> players_cords = new HashMap<>();
     private HashMap<Socket, String> players_condition = new HashMap<>();
     private ServerSocket ss; // сам сервер-сокет
@@ -180,15 +187,26 @@ public class Server {
                     players_condition.replace(s, "alive");
                     type = new TypeToken<HashSet<List<Integer>>>() {}.getType();
                     HashSet<List<Integer>> kilstr = gson.fromJson(line.split("//////")[3], type);
-                    for (Socket i : players_cords.keySet()) {
-                        if (kilstr.contains(players_cords.get(i))){
-                            players_condition.replace(i, "dead");
+                    for (SocketProcessor sp : q) {
+                        if (kilstr.contains(players_cords.get(sp.s))){
+                            players_condition.replace(sp.s, "dead");
                         }
                     }
+
+                    if (line.split("//////")[4].equals("true")) {
+                        keyOwner = s;
+                        keyCords = Arrays.stream(players_cords.get(s).toArray(new Integer [players_cords.get(s).size()])).mapToInt(Integer::intValue).toArray();
+                    }
+                    if (keyOwner != null) {
+                        if (players_condition.get(keyOwner).equals("dead")) {
+                            keyOwner = null;
+                        }
+                    }
+
                     for (SocketProcessor sp:q) {
                         if (isNext){
                             isLast = false;
-                            sp.send("\\\\your_turn: " + line.split("//////")[1] + " " + players_condition.get(s));
+                            nextTURNsend(line, sp, gson);
                         }
                         if (sp.s.equals(s)) {
                             isNext = true;
@@ -196,11 +214,11 @@ public class Server {
                     }
                     if (isLast) {
                         for (SocketProcessor sp:q) {
-                            sp.send("\\\\your_turn: " + line.split("//////")[1] + " " + players_condition.get(s));
+                            nextTURNsend(line, sp, gson);
                             break;
                         }
                     }
-                } else if (line.split(" ")[0].equals("\\\\maze_nom:")) {
+                } else if (line.split("//////")[0].equals("\\\\maze_nom:")) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -211,8 +229,17 @@ public class Server {
                             sp.send("\\\\amaze_nom: okay");
                         }
                     }
-                    mn = line.substring(line.split(" ")[0].length() + 1);
-                } else if (line.split(" ")[0].equals("\\\\rmaze_nom:")) {
+                    mn = line.split("//////")[1];
+                    Gson gson = new Gson();
+                    int[][] maz = gson.fromJson(mn, MazeExample.class).Maze;
+                    for (int i = 0; i < maz.length; i++) {
+                        for (int j = 0; j < maz[i].length; j++) {
+                            if (maz[i][j] == KEY) {
+                                keyCords = new int[]{i, j};
+                            }
+                        }
+                    }
+                } else if (line.split("//////")[0].equals("\\\\rmaze_nom:")) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -225,7 +252,7 @@ public class Server {
 //                    }
                     for (SocketProcessor sp:q) {
                         if (sp.s.equals(s)) {
-                            sp.send("\\\\maze_nom: " + mn);
+                            sp.send("\\\\maze_nom://////" + mn);
                         }
                     }
                 } else { // иначе - банальная рассылка по списку сокет-процессоров
@@ -235,6 +262,14 @@ public class Server {
                         }
                     }
                 }
+            }
+        }
+
+        private void nextTURNsend(String line, SocketProcessor sp, Gson gson) {
+            if (keyOwner == null) {
+                sp.send("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s) + "//////" + gson.toJson(keyCords));
+            } else {
+                sp.send("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s));
             }
         }
 

@@ -124,7 +124,7 @@ public class MazeBuilder extends AppCompatActivity {
             private boolean AllIsOk(int[][] pMaze) {
                 boolean res = true;
                 if (exitPlaced && IamPlaced) {
-                    if ((minotaurAmmount > 0) && ((bulletAmmount < minotaurAmmount) || (!hospitalPlaced))){
+                    if (((minotaurAmmount > 0) && ((bulletAmmount < minotaurAmmount) || (!hospitalPlaced))) || ((bulletAmmount > 0) && (!hospitalPlaced))){
                         res = false;
                         Toast t = Toast.makeText(getApplicationContext(), "You haven't placed enough bullets or hospital", Toast.LENGTH_SHORT);
                         t.show();
