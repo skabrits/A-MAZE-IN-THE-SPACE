@@ -1,6 +1,8 @@
 package com.example.sevak.themaze;
 
 import android.content.ClipData;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 public class StartPage extends AppCompatActivity {
 
     private GestureDetector mDetector;
@@ -26,6 +32,7 @@ public class StartPage extends AppCompatActivity {
         return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
+    private HashMap<View, Integer> maps = new HashMap<>();
     public static final int CELLSIZE = 140;
     public static final int TURN_NA = 0;
     public static final int TURN_UP = 1;
@@ -74,6 +81,7 @@ public class StartPage extends AppCompatActivity {
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
 
         layout.setOnDragListener(new View.OnDragListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public boolean onDrag(View view, DragEvent dragEvent) {
                 ImageView iv = (ImageView) findViewById(R.id.Trash_Can);
@@ -107,6 +115,7 @@ public class StartPage extends AppCompatActivity {
                                     .setDuration(700)
                                     .start();
                         }
+                        maps.replace(view1, ((int) dragEvent.getY()));
                         view1.setVisibility(View.VISIBLE);
                         break;
                     case DragEvent.ACTION_DRAG_ENDED:
@@ -160,6 +169,8 @@ public class StartPage extends AppCompatActivity {
         ViewGroup.MarginLayoutParams trules1 = (ViewGroup.MarginLayoutParams) layout.findViewWithTag("p1l").getLayoutParams();
         trules1.setMargins(OFFSET_LEFT - Cellsize, (int) (OFFSET_TOP + Cellsize * Maze.SIZE_Y + OFFSET_BETWEEN), 0, 0);
         layout.findViewWithTag("p1l").requestLayout();
+        maps.put(new RelativeLayout(getApplicationContext()), OFFSET_TOP);
+        maps.put(layout.findViewWithTag("p1l"), ((ViewGroup.MarginLayoutParams) layout.findViewWithTag("p1l").getLayoutParams()).topMargin);
 
         final RelativeLayout relativeLayout = (RelativeLayout) layout.findViewWithTag("p1l");
 
@@ -226,6 +237,33 @@ public class StartPage extends AppCompatActivity {
 
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
+        private int positionCount (MotionEvent e) {
+            int Cellsize = (int) ConvDPtoPX(1)*41;
+            int x = (int)e.getX();
+            int y = (int)e.getY();
+            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
+            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * Cellsize/2;
+            int xin = (x>curx + Cellsize) ? 1 : ((x<curx) ? -1 : 0);
+            int yin = (y>cury + Cellsize) ? 1 : ((y<cury) ? -1 : 0);
+            int xin1 = (x - (curx + Cellsize/2) > y - (cury + Cellsize/2)) ? 1 : -1;
+            int yin1 = (x - (curx + Cellsize/2) < - y + (cury + Cellsize/2)) ? 1 : -1;
+            if (xin == 0 && yin == 0) {
+                return (TURN_NA);
+            } else {
+                if (xin1 < 0) {
+                    if (yin1 < 0)
+                        return (TURN_DOWN);
+                    else
+                        return (TURN_LEFT);
+                } else {
+                    if (yin1 < 0)
+                        return (TURN_RIGHT);
+                    else
+                        return (TURN_UP);
+                }
+            }
+        }
+
         @Override
         public boolean onDown(MotionEvent event) {
             return true;
@@ -233,56 +271,12 @@ public class StartPage extends AppCompatActivity {
 
         @Override
         public void onLongPress(MotionEvent e) {
-            int Cellsize = (int) ConvDPtoPX(1)*41;
-            int x = (int)e.getX();
-            int y = (int)e.getY();
-            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
-            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * Cellsize/2;
-            int xin = (x>curx + Cellsize) ? 1 : ((x<curx) ? -1 : 0);
-            int yin = (y>cury + Cellsize) ? 1 : ((y<cury) ? -1 : 0);
-            if (xin < 0) {
-                if (yin == 0)
-                    shoot(TURN_LEFT);
-            } else
-            if (xin > 0) {
-                if (yin == 0)
-                    shoot(TURN_RIGHT);
-            } else
-            if (xin == 0) {
-                if (yin<0)
-                    shoot(TURN_UP);
-                else
-                if (yin>0)
-                    shoot(TURN_DOWN);
-            }
+            shoot(positionCount(e));
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            int Cellsize = (int) ConvDPtoPX(1)*41;
-            int x = (int)e.getX();
-            int y = (int)e.getY();
-            int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
-            int cury = zerocor[0] - (CurBasicCord[0] - Maze.YourCordInMaze[0]) * Cellsize/2;
-            int xin = (x>curx + Cellsize) ? 1 : ((x<curx) ? -1 : 0);
-            int yin = (y>cury + Cellsize) ? 1 : ((y<cury) ? -1 : 0);
-            if (xin < 0) {
-                if (yin == 0)
-                    turn(TURN_LEFT);
-            } else
-            if (xin > 0) {
-                if (yin == 0)
-                    turn(TURN_RIGHT);
-            } else
-            if (xin == 0) {
-                if (yin<0)
-                    turn(TURN_UP);
-                else
-                if (yin>0)
-                    turn(TURN_DOWN);
-                else
-                    turn(TURN_NA);
-            }
+            turn(positionCount(e));
             return true;
         }
     }
@@ -476,7 +470,7 @@ public class StartPage extends AppCompatActivity {
         ConstraintLayout.LayoutParams rules1 = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules1.setMargins(OFFSET_LEFT - Cellsize, (int) (OFFSET_TOP + (layoutAmount + 1) * (Cellsize * Maze.SIZE_Y + OFFSET_BETWEEN)),
+        rules1.setMargins(OFFSET_LEFT - Cellsize, (int) (Collections.max(maps.values()) + 2 * (Cellsize * Maze.SIZE_Y + OFFSET_BETWEEN)),
                 0, 100);
 
         Rl.setTag(idStr1);
@@ -499,6 +493,8 @@ public class StartPage extends AppCompatActivity {
 
         layoutbd.addView(Rl, rules1);
 
+        maps.put(Rl, ((ViewGroup.MarginLayoutParams) Rl.getLayoutParams()).topMargin);
+
         ImageView imageView = new ImageView(this);
         imageView.setTag("C"+layoutAmount);
         imageView.setImageResource(R.drawable.walls0);
@@ -517,6 +513,7 @@ public class StartPage extends AppCompatActivity {
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         l.removeView(l.findViewWithTag((res+"n")));
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
+        maps.remove(layout.findViewWithTag(res));
         layout.removeView(layout.findViewWithTag(res));
     }
 
@@ -697,9 +694,9 @@ public class StartPage extends AppCompatActivity {
 
     private void checkBullet() {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == BULLET) {
-//            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.bullet);
             Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] = 8;
-            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
+//            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.usedbullet);
             bulletAmount += 1;
         }
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == USED_BULLET) {

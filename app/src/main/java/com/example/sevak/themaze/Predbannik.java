@@ -75,7 +75,7 @@ public class Predbannik extends AppCompatActivity {
                 }
 
                 private void deleteMap() {
-                    Toast t = Toast.makeText(getApplicationContext(), "A maze" + MazeHolder.MazeArr.get(finalI1).name + "has been deleted", Toast.LENGTH_SHORT);
+                    Toast t = Toast.makeText(getApplicationContext(), "A maze " + MazeHolder.MazeArr.get(finalI1).name + " has been deleted", Toast.LENGTH_SHORT);
                     t.show();
                     Gson gson = new Gson();
                     TextView txt = new TextView(getApplicationContext());

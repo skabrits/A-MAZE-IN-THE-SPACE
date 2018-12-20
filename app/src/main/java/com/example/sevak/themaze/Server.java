@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -179,6 +180,7 @@ public class Server {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    System.out.println(s + ":: " + line);
                     boolean isNext = false;
                     boolean isLast = true;
                     Gson gson = new Gson();
@@ -189,7 +191,8 @@ public class Server {
                     HashSet<List<Integer>> kilstr = gson.fromJson(line.split("//////")[3], type);
                     for (SocketProcessor sp : q) {
                         if (kilstr.contains(players_cords.get(sp.s))){
-                            players_condition.replace(sp.s, "dead");
+                            if (kilstr.size() != 1 || !sp.s.equals(s))
+                                players_condition.replace(sp.s, "dead");
                         }
                     }
 
@@ -207,6 +210,7 @@ public class Server {
                         if (isNext){
                             isLast = false;
                             nextTURNsend(line, sp, gson);
+                            break;
                         }
                         if (sp.s.equals(s)) {
                             isNext = true;
@@ -286,6 +290,7 @@ public class Server {
          * @param line строка на отсылку
          */
         public synchronized void send(String line) {
+            System.out.println("server->" + this.s + ": " + line);
             try {
                 bw.write(line); // пишем строку
                 bw.write("\n"); // пишем перевод строки

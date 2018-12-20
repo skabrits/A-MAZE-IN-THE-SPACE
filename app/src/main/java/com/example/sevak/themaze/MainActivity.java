@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), Predbannik.class));
+                startActivity(new Intent(getApplicationContext(), SingleplayerVilka.class));
             }
         });
         ImageView levelb = (ImageView) findViewById(R.id.LevelBuilder);

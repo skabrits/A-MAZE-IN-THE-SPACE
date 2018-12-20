@@ -35,6 +35,8 @@
         <activity
             android:name=".Client"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+        <activity android:name=".SingleplayerVilka" />
+        <activity android:name=".Campaign"></activity>
     </application>
 
 </manifest>
