@@ -36,7 +36,11 @@
             android:name=".Client"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
         <activity android:name=".SingleplayerVilka" />
-        <activity android:name=".Campaign"></activity>
+        <activity android:name=".Campaign" />
+        <activity android:name=".Catsciene" />
+        <activity android:name=".StartPageCampaign" />
+        <activity android:name=".EditMapShlus" />
+        <activity android:name=".EditorChooser"></activity>
     </application>
 
 </manifest>

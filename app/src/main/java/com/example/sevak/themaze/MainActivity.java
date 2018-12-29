@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getApplicationContext(), MazeBuilder.class));
+                startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
             }
         });
         ImageView multiplayer = (ImageView) findViewById(R.id.StartMultiplayer);

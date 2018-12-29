@@ -60,6 +60,7 @@ public class Client extends AppCompatActivity {
 
     private int chmap = -1;
     private int Mazenom = -1;
+    private TextView currentTextView = null;
 
     static Boolean isSent = false;
     static Boolean isMyTurn = false;
@@ -340,6 +341,13 @@ public class Client extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_shlus);
 
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SingleplayerVilka.class));
+            }
+        });
+
         mDetector = new GestureDetector(this, new MyGestureListenerForMultiplayer());
 
         findViewById(R.id.Create_Server).setOnClickListener(new View.OnClickListener() {
@@ -475,6 +483,12 @@ public class Client extends AppCompatActivity {
             isMyTurn = true;
             isFirstConnect = false;
             setContentView(R.layout.activity_multiplayer);
+            findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(getApplicationContext(), Client.class));
+                }
+            });
             String IP = Utils.getIPAddress(true);
             System.out.println(IP);
             Thread threadservinfo = new Thread(null, new Runnable() {
@@ -503,6 +517,13 @@ public class Client extends AppCompatActivity {
 
         setContentView(R.layout.activity_multiplayer_predbannik);
 
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Client.class));
+            }
+        });
+
         MazeHolder.init(getApplicationContext());
 
         LinearLayout mc = (LinearLayout) findViewById(R.id.MapChooser);
@@ -524,7 +545,12 @@ public class Client extends AppCompatActivity {
             txt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    if(currentTextView != null) {
+                        currentTextView.setTextColor(Color.GREEN);
+                    }
                     chmap = finalI;
+                    txt.setTextColor(Color.YELLOW);
+                    currentTextView = txt;
                 }
             });
 
@@ -595,8 +621,14 @@ public class Client extends AppCompatActivity {
     private void startPageAct() {
         setContentView(R.layout.activity_multiplayer_start_page);
 
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Client.class));
+            }
+        });
 
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
 
         Maze.init();
         ImageView c1 = (ImageView) findViewById(R.id.C1);
@@ -767,7 +799,7 @@ public class Client extends AppCompatActivity {
     private class MyGestureListenerForMultiplayer extends GestureDetector.SimpleOnGestureListener {
 
         private int positionCount (MotionEvent e) {
-            int Cellsize = (int) ConvDPtoPX(1)*41;
+            int Cellsize = (int) ConvDPtoPX(41);
             int x = (int)e.getX();
             int y = (int)e.getY();
             int curx = zerocor[1] - (CurBasicCord[1] - Maze.YourCordInMaze[1]) * Cellsize/2;
@@ -1004,7 +1036,7 @@ public class Client extends AppCompatActivity {
     }
 
     private void prepareNEWlayout() {
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
         int[][] YourMaze = new int[Maze.YourMaze.length][Maze.YourMaze[1].length];
         for (int i = 0; i < YourMaze.length; i++) {
             for (int j = 0; j < YourMaze[1].length; j++) {
@@ -1404,7 +1436,7 @@ public class Client extends AppCompatActivity {
     }
 
     private void changeTagIdCell(int[] cord, int cellType) {
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
         RelativeLayout subLayoutInGlobal = (RelativeLayout) findViewById(R.id.p0l).findViewWithTag("p"+NativeLayout.toString()+"l");
         ImageView imageViewc = new ImageView(this);
         imageViewc.setId(R.id.Mec);
@@ -1427,7 +1459,7 @@ public class Client extends AppCompatActivity {
     }
 
     private void changeIdCell(int[] cord, int cellType, int ident) {
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);
@@ -1440,7 +1472,7 @@ public class Client extends AppCompatActivity {
         layout.addView(imageView, rules);
     }
     private void changeCell(int[] cord, int cellType) {
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         RelativeLayout layout = (RelativeLayout) l.findViewWithTag("p"+NativeLayout.toString()+"ln");
         ImageView imageView = new ImageView(this);

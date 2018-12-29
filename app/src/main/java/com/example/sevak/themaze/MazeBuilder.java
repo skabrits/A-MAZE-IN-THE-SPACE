@@ -1,5 +1,6 @@
 package com.example.sevak.themaze;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -56,8 +57,15 @@ public class MazeBuilder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maze_builder);
 
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
+            }
+        });
+
         findViewById(R.id.TheBegin).getBackground().setAlpha(255);
-        int Cellsize = (int) ConvDPtoPX(1)*41;
+        int Cellsize = (int) ConvDPtoPX(41);
 
         BC = new int[] {1, 1};
 
@@ -116,6 +124,20 @@ public class MazeBuilder extends AppCompatActivity {
                             t.show();
                             et.setVisibility(View.GONE);
                             bt.setVisibility(View.GONE);
+
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
+                                    Thread.currentThread().interrupt();
+                                }
+                            });
+                            thread.start();
                         }
                     });
                 }

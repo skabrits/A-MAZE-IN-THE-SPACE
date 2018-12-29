@@ -1,6 +1,7 @@
 package com.example.sevak.themaze;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -10,34 +11,41 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class Campaign extends AppCompatActivity {
+import com.google.gson.Gson;
+
+import java.util.Random;
+
+import static com.example.sevak.themaze.MazeHolder.sharedPreferencesForMholder;
+
+public class EditorChooser extends AppCompatActivity {
 
     private TextView currentTextView = null;
-    private int chlvl = -1;
+    private int chmap = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_campaign);
+        setContentView(R.layout.activity_editor_chooser);
 
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
             }
         });
 
-        LevelHolderCampaign.init(getApplicationContext());
+        MazeHolder.init(getApplicationContext());
 
         LinearLayout mc = (LinearLayout) findViewById(R.id.MapChooser);
 
         mc.removeAllViews();
 
-        for (int i = 0; i <= LevelHolderCampaign.Mylvl; i++) {
+        for (int i = 0; i < MazeHolder.MazeArr.size(); i++) {
             TextView txt = new TextView(this);
-            txt.setTag(LevelHolderCampaign.LevelArr.get(i).name);
-            txt.setText(LevelHolderCampaign.LevelArr.get(i).name);
+            txt.setTag(MazeHolder.MazeArr.get(i).name);
+            txt.setText(MazeHolder.MazeArr.get(i).name);
             txt.setTextSize(25);
             txt.setPadding(50, 20, 10, 10);
             txt.setTextColor(Color.GREEN);
@@ -52,7 +60,7 @@ public class Campaign extends AppCompatActivity {
                     if(currentTextView != null) {
                         currentTextView.setTextColor(Color.GREEN);
                     }
-                    chlvl = finalI;
+                    chmap = finalI;
                     txt.setTextColor(Color.YELLOW);
                     currentTextView = txt;
                 }
@@ -64,22 +72,12 @@ public class Campaign extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                if (chlvl != -1) {
-                    startLevel();
+                if (chmap != -1) {
+                    EditMazeHolder.MarNum = chmap;
+                    EditMazeHolder.enterMaze = MazeHolder.MazeArr.get(chmap).Maze;
+                    startActivity(new Intent(getApplicationContext(), MazeBuilder.class));
                 }
             }
         });
-    }
-
-    private void startLevel() {
-        if (LevelHolderCampaign.LevelArr.get(chlvl).type.equals("lvl")) {
-            MazeCampaign.rand = chlvl;
-            startActivity(new Intent(getApplicationContext(), StartPageCampaign.class));
-        } else {
-            if (LevelHolderCampaign.LevelArr.get(chlvl).type.equals("csc")){
-                CscHolder.videoNum = chlvl;
-                startActivity(new Intent(getApplicationContext(), Catsciene.class));
-            }
-        }
     }
 }

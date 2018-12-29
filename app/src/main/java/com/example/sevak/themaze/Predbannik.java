@@ -28,12 +28,20 @@ import static com.example.sevak.themaze.StartPage.OFFSET_TOP;
 
 public class Predbannik extends AppCompatActivity {
 
+    private TextView currentTextView = null;
     private int chmap = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_predbannik);
+
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SingleplayerVilka.class));
+            }
+        });
 
         MazeHolder.init(getApplicationContext());
 
@@ -56,7 +64,12 @@ public class Predbannik extends AppCompatActivity {
             txt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    if(currentTextView != null) {
+                        currentTextView.setTextColor(Color.GREEN);
+                    }
                     chmap = finalI;
+                    txt.setTextColor(Color.YELLOW);
+                    currentTextView = txt;
                 }
             });
 

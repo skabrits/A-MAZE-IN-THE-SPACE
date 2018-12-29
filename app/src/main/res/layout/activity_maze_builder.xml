@@ -383,6 +383,16 @@
                         android:layout_centerHorizontal="true"
                         android:text="FINISH" />
 
+                    <ImageView
+                        android:id="@+id/rev"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginEnd="358dp"
+                        android:layout_marginRight="358dp"
+                        app:srcCompat="@android:drawable/ic_menu_revert" />
+
                 </RelativeLayout>
 
             </android.support.constraint.ConstraintLayout>
