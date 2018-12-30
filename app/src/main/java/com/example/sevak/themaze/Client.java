@@ -284,6 +284,12 @@ public class Client extends AppCompatActivity {
                     Gson gson = new Gson();
                     MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
                     Mazenom = MazeHolder.MazeArr.size() - 1;
+
+                    SharedPreferences sharedPreferencesForMholder;
+                    sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
+                    SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+                    ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+                    ed.apply();
                 } else if (line.split("//////")[0].equals("\\\\amaze_nom:")) {
                     if (line.split("//////")[1].equals("okay")) {
                         ServnotgotMazenom = false;
@@ -344,7 +350,7 @@ public class Client extends AppCompatActivity {
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), SingleplayerVilka.class));
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
         });
 

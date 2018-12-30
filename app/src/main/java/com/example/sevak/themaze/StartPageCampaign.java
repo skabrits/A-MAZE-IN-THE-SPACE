@@ -70,6 +70,13 @@ public class StartPageCampaign extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
 
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Campaign.class));
+            }
+        });
+
         int Cellsize = (int) ConvDPtoPX(41);
 
         MazeCampaign.init();

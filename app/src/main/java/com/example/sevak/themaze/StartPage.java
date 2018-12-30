@@ -1,6 +1,7 @@
 package com.example.sevak.themaze;
 
 import android.content.ClipData;
+import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
@@ -66,6 +67,13 @@ public class StartPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
+
+        findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Predbannik.class));
+            }
+        });
 
         int Cellsize = (int) ConvDPtoPX(41);
 

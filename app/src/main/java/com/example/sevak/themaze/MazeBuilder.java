@@ -32,6 +32,7 @@ import static com.example.sevak.themaze.StartPage.KEY;
 import static com.example.sevak.themaze.StartPage.MINOTAUR;
 import static com.example.sevak.themaze.StartPage.OFFSET_LEFT;
 import static com.example.sevak.themaze.StartPage.OFFSET_TOP;
+import static com.example.sevak.themaze.StartPage.TELEPORT;
 
 public class MazeBuilder extends AppCompatActivity {
 
@@ -92,55 +93,74 @@ public class MazeBuilder extends AppCompatActivity {
                     MazeExample Mazik = new MazeExample();
                     Mazik.Maze = PMaze;
                     Mazik.BasicCordinats = BC;
-                    final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
-                    final EditText et = new EditText(rl.getContext());
-                    RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.WRAP_CONTENT,
-                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    p.setMargins(300, 10, 10, 10);
-                    et.setHint("write maze name");
-                    rl.addView(et, p);
-                    final Button bt = new Button(rl.getContext());
-                    RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.WRAP_CONTENT,
-                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    bt.setText("confirm");
-                    p1.setMargins(500, 10, 10, 10);
-                    rl.addView(bt, p1);
-                    bt.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Mazik.name = et.getText().toString();
-                            MazeHolder.MazeArr.add(Mazik);
+                    if (EditMazeHolder.MarNum != -1) {
+                        Mazik.name = MazeHolder.MazeArr.get(EditMazeHolder.MarNum).name;
+                        MazeHolder.MazeArr.set(EditMazeHolder.MarNum, Mazik);
 
-                            Gson gson = new Gson();
-                            SharedPreferences sharedPreferencesForMholder;
-                            sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
-                            SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
-                            ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
-                            ed.apply();
+                        finish(null, null);
+                    } else {
+                        final RelativeLayout rl = (RelativeLayout) findViewById(R.id.workspace);
+                        final EditText et = new EditText(rl.getContext());
+                        RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        p.setMargins(300, 10, 10, 10);
+                        et.setHint("write maze name");
+                        rl.addView(et, p);
+                        final Button bt = new Button(rl.getContext());
+                        RelativeLayout.LayoutParams p1 = new RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        bt.setText("confirm");
+                        p1.setMargins(500, 10, 10, 10);
+                        rl.addView(bt, p1);
+                        bt.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
 
-                            Toast t = Toast.makeText(getApplicationContext(), "A maze has been created", Toast.LENGTH_SHORT);
-                            t.show();
-                            et.setVisibility(View.GONE);
-                            bt.setVisibility(View.GONE);
-
-                            Thread thread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                    startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
-                                    Thread.currentThread().interrupt();
-                                }
-                            });
-                            thread.start();
-                        }
-                    });
+                                Mazik.name = et.getText().toString();
+                                MazeHolder.MazeArr.add(Mazik);
+                                finish(et, bt);
+                            }
+                        });
+                    }
                 }
+            }
+
+            private void finish(EditText et, Button bt) {
+                EditMazeHolder.enterMaze = new Integer[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+                EditMazeHolder.bs = null;
+                Gson gson = new Gson();
+                SharedPreferences sharedPreferencesForMholder;
+                sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
+                SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+                ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+                ed.apply();
+
+                if (EditMazeHolder.MarNum == -1) {
+                    Toast t = Toast.makeText(getApplicationContext(), "A maze has been created", Toast.LENGTH_SHORT);
+                    t.show();
+                    et.setVisibility(View.GONE);
+                    bt.setVisibility(View.GONE);
+                } else {
+                    Toast t = Toast.makeText(getApplicationContext(), "A maze has been edited", Toast.LENGTH_SHORT);
+                    t.show();
+                }
+                EditMazeHolder.MarNum = -1;
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
+                        Thread.currentThread().interrupt();
+                    }
+                });
+                thread.start();
             }
 
             private boolean AllIsOk(int[][] pMaze) {
@@ -444,14 +464,6 @@ public class MazeBuilder extends AppCompatActivity {
                     }
                 }
 
-                private void AddView(RelativeLayout thisView, int finalI) {
-                    ImageView iv = (ImageView) addl.getChildAt(finalI);
-                    ImageView imageView = new ImageView(thisView.getContext());
-                    imageView.setImageDrawable(iv.getDrawable());
-                    imageView.setTag(String.valueOf(finalI));
-                    thisView.addView(imageView);
-                }
-
                 private boolean wallcheck(int finalI, int[] cord) {
                     boolean res;
                     res = true;
@@ -521,31 +533,64 @@ public class MazeBuilder extends AppCompatActivity {
 
         mDetector = new GestureDetector(this, new MyGestureListener());
 
-        TMaze[1][1] = 0;
-        RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
-        final RelativeLayout relativeLayout = new RelativeLayout(this);
-        ImageView imageView = new ImageView(this);
-        imageView.setImageResource(R.drawable.walls0);
-        relativeLayout.addView(imageView);
-        relativeLayout.setTag(0 + " " + 0);
-        relativeLayout.setClickable(true);
-        relativeLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (relativeLayout.isClickable()) {
-                    mDetector.onTouchEvent(motionEvent);
-                    thisView = relativeLayout;
-                }
-                return true;
-            }
-        });
-        RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT);
-        rules.setMargins(OFFSET_LEFT, OFFSET_TOP, 0, 0);
-        layout.addView(relativeLayout, rules);
-
+        final TextView hc = (TextView) findViewById(R.id.HCounter);
         final TextView wc = (TextView) findViewById(R.id.WCounter);
+
+        Integer[][] m = TMaze;
+        TMaze = EditMazeHolder.enterMaze;
+        for (int i = 0; i < TMaze.length; i++) {
+            for (int j = 0; j < TMaze[0].length; j++) {
+                m[i][j] = TMaze[i][j];
+            }
+        }
+        wc.setText(String.valueOf(TMaze[0].length/2));
+        hc.setText(String.valueOf(TMaze.length/2));
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.workspace);
+        for (int i = 0; i < TMaze.length/2; i++) {
+            for (int j = 0; j < TMaze[0].length/2; j++) {
+                final RelativeLayout relativeLayout = new RelativeLayout(this);
+                ImageView imageView = new ImageView(this);
+                imageView.setImageResource(R.drawable.walls0);
+                relativeLayout.addView(imageView);
+                relativeLayout.setTag(i + " " + j);
+                relativeLayout.setClickable(true);
+                relativeLayout.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if (relativeLayout.isClickable()) {
+                            mDetector.onTouchEvent(motionEvent);
+                            thisView = relativeLayout;
+                        }
+                        return true;
+                    }
+                });
+                thisView = relativeLayout;
+                RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                rules.setMargins(OFFSET_LEFT + Cellsize * j, OFFSET_TOP + Cellsize * i, 0, 0);
+                layout.addView(relativeLayout, rules);
+
+                if (i == TMaze.length/2 - 1) {
+                    checkForDownWalls(TMaze[i * 2 + 2][j * 2 + 1]);
+                }
+                if (j == TMaze[0].length/2 - 1) {
+                    checkForRightWalls(TMaze[i * 2 + 1][j * 2 + 2]);
+                }
+
+                checkForLeftWalls(TMaze[i * 2 + 1][j * 2]);
+                checkForUpWalls(TMaze[i * 2][j * 2 + 1]);
+
+                checkForContent(TMaze[i * 2 + 1][j * 2 + 1]);
+            }
+        }
+        thisView = null;
+        if (EditMazeHolder.bs != null) {
+            IamPlaced = true;
+            AddView(layout.findViewWithTag((EditMazeHolder.bs[0] - 1) / 2 + " " + (EditMazeHolder.bs[1] - 1) / 2), 9);
+            BC = EditMazeHolder.bs;
+        }
+        TMaze = m;
 
         ImageView wl = (ImageView) findViewById(R.id.WArL);
         wl.setOnClickListener(new View.OnClickListener() {
@@ -571,8 +616,6 @@ public class MazeBuilder extends AppCompatActivity {
         });
 
 
-        final TextView hc = (TextView) findViewById(R.id.HCounter);
-
         ImageView hl = (ImageView) findViewById(R.id.HArL);
         hl.setOnClickListener(new View.OnClickListener() {
 
@@ -596,6 +639,112 @@ public class MazeBuilder extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void checkForContent(Integer integer) {
+        switch (integer) {
+            case 12: {
+                AddView(thisView, 2);
+                break;
+            }
+            case 13: {
+                AddView(thisView, 3);
+                break;
+            }
+            case 14: {
+                AddView(thisView, 4);
+                break;
+            }
+            case 11: {
+                AddView(thisView, 5);
+                break;
+            }
+            case MINOTAUR: {
+                minotaurAmmount++;
+                AddView(thisView, 14);
+                break;
+            }
+            case HOSPITAL: {
+                hospitalPlaced = true;
+                AddView(thisView, 15);
+                break;
+            }
+            case BFG: {
+                AddView(thisView, 16);
+                break;
+            }
+            case BULLET: {
+                bulletAmmount++;
+                AddView(thisView, 17);
+                break;
+            }
+            case KEY: {
+                keyPlaced = true;
+                AddView(thisView, 18);
+                break;
+            }
+            default:{
+                if (integer > TELEPORT && integer < 1000){
+                    AddView(thisView, 8);
+                }
+            }
+        }
+    }
+
+    private void checkForUpWalls(Integer integer) {
+        switch (integer) {
+            case 1: {
+                AddView(thisView, 0);
+                break;
+            }
+            case 2: {
+                AddView(thisView, 10);
+                exitPlaced = true;
+                break;
+            }
+        }
+    }
+
+    private void checkForLeftWalls(Integer integer) {
+        switch (integer) {
+            case 1: {
+                AddView(thisView, 6);
+                break;
+            }
+            case 2: {
+                AddView(thisView, 13);
+                exitPlaced = true;
+                break;
+            }
+        }
+    }
+
+    private void checkForRightWalls(Integer integer) {
+        switch (integer) {
+            case 1: {
+                AddView(thisView, 7);
+                break;
+            }
+            case 2: {
+                AddView(thisView, 11);
+                exitPlaced = true;
+                break;
+            }
+        }
+    }
+
+    private void checkForDownWalls(Integer integer) {
+        switch (integer) {
+            case 1: {
+                AddView(thisView, 1);
+                break;
+            }
+            case 2: {
+                AddView(thisView, 12);
+                exitPlaced = true;
+                break;
+            }
+        }
     }
 
     private void KillCellElem(int finalI) {
@@ -906,5 +1055,14 @@ public class MazeBuilder extends AppCompatActivity {
             RelativeLayout view = (RelativeLayout) layout.findViewWithTag(String.valueOf(i) + " " + (Integer.parseInt(wc.getText().toString()) - 1));
             DelBody(layout, view);
         }
+    }
+
+    private void AddView(RelativeLayout thisView, int finalI) {
+        final LinearLayout addl = (LinearLayout) findViewById(R.id.AddNEWView);
+        ImageView iv = (ImageView) addl.getChildAt(finalI);
+        ImageView imageView = new ImageView(thisView.getContext());
+        imageView.setImageDrawable(iv.getDrawable());
+        imageView.setTag(String.valueOf(finalI));
+        thisView.addView(imageView);
     }
 }

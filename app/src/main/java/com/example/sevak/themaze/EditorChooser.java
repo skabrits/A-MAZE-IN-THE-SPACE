@@ -3,6 +3,8 @@ package com.example.sevak.themaze;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static com.example.sevak.themaze.MazeHolder.sharedPreferencesForMholder;
@@ -70,11 +73,19 @@ public class EditorChooser extends AppCompatActivity {
         ImageView chose = (ImageView) findViewById(R.id.chooselayout);
         chose.setOnClickListener(new View.OnClickListener() {
 
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View view) {
                 if (chmap != -1) {
                     EditMazeHolder.MarNum = chmap;
-                    EditMazeHolder.enterMaze = MazeHolder.MazeArr.get(chmap).Maze;
+                    int[][] a = MazeHolder.MazeArr.get(chmap).Maze;
+                    EditMazeHolder.enterMaze = new Integer[a.length][a[0].length];
+                    for (int i = 0; i < a.length; i++) {
+                        for (int j = 0; j < a[0].length; j++) {
+                            EditMazeHolder.enterMaze[i][j] = a[i][j];
+                        }
+                    }
+                    EditMazeHolder.bs = MazeHolder.MazeArr.get(chmap).BasicCordinats;
                     startActivity(new Intent(getApplicationContext(), MazeBuilder.class));
                 }
             }
