@@ -24,7 +24,7 @@ public class Campaign extends AppCompatActivity {
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                startActivity(new Intent(getApplicationContext(), SingleplayerVilka.class));
             }
         });
 

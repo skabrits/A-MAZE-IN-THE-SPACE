@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class StartPage extends AppCompatActivity {
@@ -34,6 +35,7 @@ public class StartPage extends AppCompatActivity {
     }
 
     private HashMap<View, Integer> maps = new HashMap<>();
+    private HashMap<int[][], String> transitions = new HashMap<>();
     public static final int CELLSIZE = 140;
     public static final int TURN_NA = 0;
     public static final int TURN_UP = 1;
@@ -51,6 +53,8 @@ public class StartPage extends AppCompatActivity {
     public static final int KEY = 2;
     public static final int DEAD_MINOTAUR = 7;
     public static final int USED_BULLET = 8;
+    private Integer bolLayout;
+    private Integer exitLayout;
     private Integer layoutAmount = 1;
     private Integer CurrentLayout = 1;
     private Integer NativeLayout = 1;
@@ -58,9 +62,12 @@ public class StartPage extends AppCompatActivity {
     private Integer bulletAmount = 0;
     private Boolean isAnYweapon = false;
     private Boolean isAnYkey = false;
+    private Boolean bolnitsaDescovered = false;
+    private Boolean exitDescovered = false;
 //TODO: merge current location and global map pages
     private int[] zerocor = new int[2];
-    private int[] Laycor = new int[2];
+    private int[] BolLaycor = new int[2];
+    private int[] exitLaycor = new int[2];
     private int[] CurBasicCord  = new int[2];
     public static int vX, vY;
     @Override
@@ -123,7 +130,10 @@ public class StartPage extends AppCompatActivity {
                                     .setDuration(700)
                                     .start();
                         }
+                        int oldcord = maps.get(view1);
+                        int rasnitsa = (int) Math.abs(dragEvent.getY() - oldcord);
                         maps.replace(view1, ((int) dragEvent.getY()));
+
                         view1.setVisibility(View.VISIBLE);
                         break;
                     case DragEvent.ACTION_DRAG_ENDED:
@@ -282,6 +292,7 @@ public class StartPage extends AppCompatActivity {
             shoot(positionCount(e));
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             turn(positionCount(e));
@@ -518,6 +529,12 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void deleteLayout(String res) {
+        if (Integer.parseInt(res.substring(1).split("l")[0]) == bolLayout) {
+            bolnitsaDescovered = false;
+        }
+        if (Integer.parseInt(res.substring(1).split("l")[0]) == exitLayout) {
+            exitDescovered = false;
+        }
         ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         l.removeView(l.findViewWithTag((res+"n")));
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
@@ -536,6 +553,7 @@ public class StartPage extends AppCompatActivity {
         ThisLayout = LayoutNumber;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void river(int[] cord){
         switch (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]]) {
             case 11:{
@@ -597,6 +615,7 @@ public class StartPage extends AppCompatActivity {
         }
     }
     //TODO: simplify walking interface (triangle areas instead of rectangles)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void go(int[] cord, int side){
         boolean b = false;
         switch (side){
@@ -659,6 +678,7 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void GoEvents() {
         ImageView iv = (ImageView) findViewById(R.id.Me);
         delView(iv);
@@ -678,11 +698,167 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkHospital() {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == HOSPITAL) {
-            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+            if (!bolnitsaDescovered) {
+                bolLayout = ThisLayout;
+                BolLaycor[0] = CurBasicCord[0];
+                BolLaycor[1] = CurBasicCord[1];
+                bolnitsaDescovered = true;
+                changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+            } else {
+                if (!NativeLayout.equals(bolLayout)) {
+                    mergeLayouts(bolLayout, CurrentLayout);
+                    bolLayout = NativeLayout;
+                }
+            }
         }
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void mergeLayouts(Integer l1, Integer l2) {
+        ImageView iMv = (ImageView) findViewById(R.id.Me);
+        delView(iMv);
+        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+        delTagView(iMvc);
+        prepareNEWlayout();
+        CurrentLayout = layoutAmount;
+        NativeLayout = CurrentLayout;
+        goToThisLayout(layoutAmount);
+        ThisLayout = NativeLayout;
+        setLayoutAScurrent(layoutAmount);
+        for (int i = 0; i < Maze.YourMazesholder.get(l1).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(l1)[0].length; j++) {
+                if (Maze.YourMazesholder.get(l1)[i][j] == -1) {
+                    Maze.YourMazesholder.get(l1)[i][j] = Maze.YourMazesholder.get(l2)[i][j];
+                }
+            }
+        }
+        Maze.YourMazesholder.replace(NativeLayout, Maze.YourMazesholder.get(l1));
+
+        for (int i = 0; i < Maze.YourMazesholder.get(NativeLayout).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(NativeLayout)[0].length; j++) {
+                if (Maze.YourMazesholder.get(NativeLayout)[i][j] != -1) {
+                    if (i % 2 == 1) {
+                        if (j % 2 == 1)
+                            changeCell(new int[]{i, j}, R.drawable.walls0);
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < Maze.YourMazesholder.get(NativeLayout).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(NativeLayout)[0].length; j++) {
+                if (Maze.YourMazesholder.get(NativeLayout)[i][j] != -1) {
+                    if (i % 2 == 1) {
+                        if (j % 2 == 1)
+                            checkForContent(new int[]{i, j}, Maze.Maze);
+                        else {
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j - 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1rightpr, R.drawable.exitright, new int[]{i, j-1});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j + 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1leftpr, R.drawable.exitleft, new int[]{i, j+1});
+                            }
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j + 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1leftpr, R.drawable.exitleft, new int[]{i, j+1});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j - 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1rightpr, R.drawable.exitright, new int[]{i, j-1});
+                            }
+                        }
+                    } else {
+                        if (j % 2 == 1) {
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i - 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1downpr, R.drawable.exitdown, new int[]{i-1, j});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i + 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1uppr, R.drawable.exitup, new int[]{i+1, j});
+                            }
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i + 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1uppr, R.drawable.exitup, new int[]{i+1, j});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i - 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1downpr, R.drawable.exitdown, new int[]{i-1, j});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        deleteLayout("p"+l1+"l");
+        deleteLayout("p"+l2+"l");
+    }
+
+    private void checkForContent(int[] cord, int[][] maze) {
+        switch (maze[cord[0]][cord[1]]) {
+            case 11: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 12: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 13: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 14: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case DEAD_MINOTAUR: {
+                changeCell(cord, R.drawable.deadminotavr);
+                break;
+            }
+            case MINOTAUR: {
+                changeCell(cord, R.drawable.minotavr);
+                break;
+            }
+            case HOSPITAL: {
+                changeCell(cord, R.drawable.hospital);
+                break;
+            }
+            case BFG: {
+                changeCell(cord, R.drawable.bfg);
+                break;
+            }
+            case BULLET: {
+                changeCell(cord, R.drawable.bullet);
+                break;
+            }
+            case KEY: {
+                changeCell(cord, R.drawable.key);
+                break;
+            }
+            default:{
+                if (maze[cord[0]][cord[1]] > TELEPORT && maze[cord[0]][cord[1]] < 1000){
+                    changeCell(cord, R.drawable.teleport1);
+                }
+            }
+        }
+    }
+
+
+    private void checkForTheWalls(int[] cord, int[][] maze, int res, int res1, int[] placecord) {
+        switch (maze[cord[0]][cord[1]]) {
+            case 1: {
+                changeCell(placecord, res);
+                break;
+            }
+            case 2: {
+                changeCell(placecord, res1);
+                break;
+            }
+        }
+    }
+
 
     private void checkKEY() {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == KEY) {
@@ -725,15 +901,45 @@ public class StartPage extends AppCompatActivity {
     private void die(int[] yourCordInMaze) {
         Toast t = Toast.makeText(getApplicationContext(), "You were killed", Toast.LENGTH_SHORT);
         t.show();
-        moveTOnewlayout();
-        Maze.YourCordInMaze[0] = Maze.hospital.get(HOSPITAL)[0];
-        Maze.YourCordInMaze[1] = Maze.hospital.get(HOSPITAL)[1];
-        CurBasicCord[0] = Maze.YourCordInMaze[0];
-        CurBasicCord[1] = Maze.YourCordInMaze[1];
-        Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
-        changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+        if (bolnitsaDescovered) {
+            moveTOtheBolnitsa();
+            hospitalPrep();
+            CurBasicCord[0] = BolLaycor[0];
+            CurBasicCord[1] = BolLaycor[1];
+            changeTagIdCell(Maze.YourCordInMaze, R.drawable.milkiipidoras);
+            changeIdCell(Maze.YourCordInMaze, R.drawable.milkiipidoras, R.id.Me);
+        } else {
+            BolLaycor[0] = Maze.hospital.get(HOSPITAL)[0];
+            BolLaycor[1] = Maze.hospital.get(HOSPITAL)[1];
+            moveTOnewlayout();
+            bolnitsaDescovered = true;
+            bolLayout = ThisLayout;
+            hospitalPrep();
+            CurBasicCord[0] = Maze.YourCordInMaze[0];
+            CurBasicCord[1] = Maze.YourCordInMaze[1];
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+        }
     }
 
+    private void hospitalPrep() {
+        Maze.YourCordInMaze[0] = Maze.hospital.get(HOSPITAL)[0];
+        Maze.YourCordInMaze[1] = Maze.hospital.get(HOSPITAL)[1];
+//        Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+    }
+
+    private void moveTOtheBolnitsa() {
+        ImageView iMv = (ImageView) findViewById(R.id.Me);
+        delView(iMv);
+        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+        delTagView(iMvc);
+        setLayoutAScurrent(bolLayout);
+        CurrentLayout = bolLayout;
+        NativeLayout = CurrentLayout;
+        goToThisLayout(bolLayout);
+        ThisLayout = NativeLayout;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void goFORriver(int[] cord, int side){
         switch (side){
             case 1: {
@@ -759,8 +965,24 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
-    private void finishgame(){
-        if (Maze.isKey){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void finishgame() {
+
+        if (!exitDescovered) {
+            exitLayout = ThisLayout;
+            exitLaycor[0] = CurBasicCord[0];
+            exitLaycor[1] = CurBasicCord[1];
+            exitDescovered = true;
+        } else {
+            if (!NativeLayout.equals(exitLayout)) {
+                mergeLayouts(exitLayout, CurrentLayout);
+                exitLayout = NativeLayout;
+                exitDescovered = true;
+            }
+        }
+
+
+        if (Maze.isKey) {
             if (isAnYkey) {
                 Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
                 t.show();
@@ -798,6 +1020,7 @@ public class StartPage extends AppCompatActivity {
             }
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkTheRvrORtp(){
         if ((Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] < TELEPORT) && (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > 10)) {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
@@ -808,6 +1031,7 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkTheRvrORtpFORriver(){
         if ((Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] < TELEPORT) && (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > 10)) {
             river(Maze.YourCordInMaze);
@@ -900,6 +1124,7 @@ public class StartPage extends AppCompatActivity {
         delTagView(ivc);
         changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
     }
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void turn(int side) {
         switch (side) {
             case TURN_NA: {
