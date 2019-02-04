@@ -570,6 +570,8 @@ public class StartPage extends AppCompatActivity {
     }
 
     private void deleteLayout(String res) {
+        transitionLayouts.add(bolLayout);
+        transitionLayouts.add(exitLayout);
         if (bolLayout != null) {
             if (Integer.parseInt(res.substring(1).split("l")[0]) == bolLayout) {
                 bolnitsaDescovered = false;
@@ -582,15 +584,17 @@ public class StartPage extends AppCompatActivity {
         }
         if (transitionLayouts.contains(Integer.parseInt(res.substring(1).split("l")[0]))) {
             transitionLayouts.remove(Integer.parseInt(res.substring(1).split("l")[0]));
-            for (TransperKey k : transitions.keySet()) {
+            HashMap<TransperKey, TransperValue> vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperKey k : vtk.keySet()) {
                 if (k.lname == Integer.parseInt(res.substring(1).split("l")[0])) {
                     transitions.remove(k);
                 }
             }
-            for (TransperValue v : transitions.values()) {
+            vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperValue v : vtk.values()) {
                 if (v.lname == Integer.parseInt(res.substring(1).split("l")[0])) {
-                    for (TransperKey k : transitions.keySet()) {
-                        if (transitions.get(k).equals(v)) {
+                    for (TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
                             transitions.remove(k);
                         }
                     }
@@ -773,7 +777,7 @@ public class StartPage extends AppCompatActivity {
                 if (!NativeLayout.equals(bolLayout)) {
                     mergeLayouts(bolLayout, CurrentLayout);
                     BolLaycor[0] = CurBasicCord[0];
-                    BolLaycor[0] = CurBasicCord[1];
+                    BolLaycor[1] = CurBasicCord[1];
                     bolLayout = NativeLayout;
                     bolnitsaDescovered = true;
                 }
@@ -865,17 +869,19 @@ public class StartPage extends AppCompatActivity {
         if (transitionLayouts.contains(l1)) {
             transitionLayouts.remove(l1);
             transitionLayouts.add(NativeLayout);
-            for (TransperKey k : transitions.keySet()) {
+            HashMap<TransperKey, TransperValue> vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperKey k : vtk.keySet()) {
                 if (k.lname == l1) {
                     TransperKey k1 = new TransperKey(NativeLayout, k.cord);
                     transitions.put(k1, transitions.get(k));
                     transitions.remove(k);
                 }
             }
-            for (TransperValue v : transitions.values()) {
+            vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperValue v : vtk.values()) {
                 if (v.lname == l1) {
-                    for (TransperKey k : transitions.keySet()) {
-                        if (transitions.get(k).equals(v)) {
+                    for (TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
                             TransperValue v1 = new TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, v.cord2);
                             transitions.replace(k, v1);
                         }
@@ -885,17 +891,19 @@ public class StartPage extends AppCompatActivity {
         }
         if (transitionLayouts.contains(l2)) {
             transitionLayouts.remove(l2);
-            for (TransperKey k : transitions.keySet()) {
+            HashMap<TransperKey, TransperValue> vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperKey k : vtk.keySet()) {
                 if (k.lname == l2) {
                     TransperKey k1 = new TransperKey(NativeLayout, k.cord);
                     transitions.put(k1, transitions.get(k));
                     transitions.remove(k);
                 }
             }
-            for (TransperValue v : transitions.values()) {
+            vtk = (HashMap<TransperKey, TransperValue>) transitions.clone();
+            for (TransperValue v : vtk.values()) {
                 if (v.lname == l2) {
-                    for (TransperKey k : transitions.keySet()) {
-                        if (transitions.get(k).equals(v)) {
+                    for (TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
                             TransperValue v1 = new TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, v.cord2);
                             transitions.replace(k, v1);
                         }
