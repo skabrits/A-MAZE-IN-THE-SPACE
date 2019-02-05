@@ -1281,7 +1281,20 @@ public class StartPage extends AppCompatActivity {
         switch (side) {
             case TURN_NA: {
                 if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] >= TELEPORT) {
-                    teleport(Maze.YourCordInMaze);
+                    TransperKey transper = new TransperKey(NativeLayout, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                    if (transitions.containsKey(transper)) {
+                        MoveToKnownLayout(new int[] {Objects.requireNonNull(transitions.get(transper)).cord2[0], Objects.requireNonNull(transitions.get(transper)).cord2[1]}, new int[]{Objects.requireNonNull(transitions.get(transper)).cord[0], Objects.requireNonNull(transitions.get(transper)).cord[1]}, Objects.requireNonNull(transitions.get(transper)).lname);
+                    } else {
+                        if (transitionLayouts.contains(NativeLayout) || NativeLayout.equals(bolLayout) || NativeLayout.equals(exitLayout)) {
+                            transitions.put(transper, null);
+                            teleport(Maze.YourCordInMaze);
+                            TransperValue transperValue = new TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                            transitions.replace(transper, transperValue);
+                            transitionLayouts.add((Integer) NativeLayout);
+                        } else {
+                            teleport(Maze.YourCordInMaze);
+                        }
+                    }
                 }
                 break;
             }
