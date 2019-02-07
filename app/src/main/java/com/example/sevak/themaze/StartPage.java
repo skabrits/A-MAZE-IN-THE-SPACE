@@ -776,6 +776,9 @@ public class StartPage extends AppCompatActivity {
             } else {
                 if (!NativeLayout.equals(bolLayout)) {
                     mergeLayouts(bolLayout, CurrentLayout);
+//                    if (NativeLayout.equals(bolLayout)) {
+//                        BolLaycor = CurBasicCord.clone();
+//                    }
                     BolLaycor[0] = CurBasicCord[0];
                     BolLaycor[1] = CurBasicCord[1];
                     bolLayout = NativeLayout;
@@ -791,16 +794,8 @@ public class StartPage extends AppCompatActivity {
         transitionLayouts.add(bolLayout);
         transitionLayouts.add(exitLayout);
 
-        ImageView iMv = (ImageView) findViewById(R.id.Me);
-        delView(iMv);
-        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
-        delTagView(iMvc);
-        prepareNEWlayout();
-        CurrentLayout = layoutAmount;
-        NativeLayout = CurrentLayout;
-        goToThisLayout(layoutAmount);
-        ThisLayout = NativeLayout;
-        setLayoutAScurrent(layoutAmount);
+        moveTOnewlayout();
+
         for (int i = 0; i < Maze.YourMazesholder.get(l1).length; i++) {
             for (int j = 0; j < Maze.YourMazesholder.get(l1)[0].length; j++) {
                 if (Maze.YourMazesholder.get(l1)[i][j] == -1) {
@@ -1032,6 +1027,7 @@ public class StartPage extends AppCompatActivity {
             KnownLayoutPrep(Objects.requireNonNull(Maze.hospital.get(HOSPITAL)));
             CurBasicCord[0] = Maze.YourCordInMaze[0];
             CurBasicCord[1] = Maze.YourCordInMaze[1];
+            Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
         }
     }
@@ -1048,7 +1044,6 @@ public class StartPage extends AppCompatActivity {
     private void KnownLayoutPrep(int[] cord) {
         Maze.YourCordInMaze[0] = cord[0];
         Maze.YourCordInMaze[1] = cord[1];
-//        Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
     }
 
     private void moveTOtheLayoutKnown(int bolLayout) {
@@ -1099,7 +1094,16 @@ public class StartPage extends AppCompatActivity {
             exitDescovered = true;
         } else {
             if (!NativeLayout.equals(exitLayout)) {
+                boolean isbol = false;
+                if (NativeLayout.equals(bolLayout)) {
+                    isbol = true;
+                }
                 mergeLayouts(exitLayout, CurrentLayout);
+                if (isbol) {
+                    bolLayout = NativeLayout;
+                    bolnitsaDescovered = true;
+                    BolLaycor = CurBasicCord.clone();
+                }
                 exitLaycor[0] = CurBasicCord[0];
                 exitLaycor[0] = CurBasicCord[1];
                 exitLayout = NativeLayout;
