@@ -35,7 +35,7 @@ public class StartPage extends AppCompatActivity {
         return dp*((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
-    private class TransperKey {
+    public static class TransperKey {
         int lname;
         int[] cord;
         TransperKey(int ln, int[] c) {
@@ -63,7 +63,7 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
-    private class TransperValue extends TransperKey {
+    public static class TransperValue extends TransperKey {
         int[] cord2;
 
         TransperValue(int ln, int[] c, int[] c2) {
@@ -859,8 +859,6 @@ public class StartPage extends AppCompatActivity {
                 }
             }
         }
-        int j = l1;
-        System.out.println(j);
         if (transitionLayouts.contains(l1)) {
             transitionLayouts.remove(l1);
             transitionLayouts.add(NativeLayout);
@@ -1013,7 +1011,7 @@ public class StartPage extends AppCompatActivity {
         }
     }
 
-    private void die(int[] yourCordInMaze) {
+    public void die(int[] yourCordInMaze) {
         Toast t = Toast.makeText(getApplicationContext(), "You were killed", Toast.LENGTH_SHORT);
         t.show();
         if (bolnitsaDescovered) {

@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -313,6 +314,10 @@ public class Client extends AppCompatActivity {
 
     private int hasUsedKnife = 0;
     private HashMap<View, Integer> maps = new HashMap<>();
+    private HashSet<Integer> transitionLayouts = new HashSet<>();
+    private HashMap<Integer, StartPage.TransperKey[]> transread = new HashMap<>();
+    private HashMap<StartPage.TransperKey, StartPage.TransperValue> transitions = new HashMap<>();
+
     public static final int CELLSIZE = 140;
     public static final int TURN_NA = 0;
     public static final int TURN_UP = 1;
@@ -330,6 +335,8 @@ public class Client extends AppCompatActivity {
     public static final int KEY = 2;
     public static final int DEAD_MINOTAUR = 7;
     public static final int USED_BULLET = 8;
+    private Integer bolLayout;
+    private Integer exitLayout;
     private Integer layoutAmount = 1;
     private Integer CurrentLayout = 1;
     private Integer NativeLayout = 1;
@@ -337,9 +344,12 @@ public class Client extends AppCompatActivity {
     private Integer bulletAmount = 0;
     private Boolean isAnYweapon = false;
     private Boolean isAnYkey = false;
+    private Boolean bolnitsaDescovered = false;
+    private Boolean exitDescovered = false;
     //TODO: merge current location and global map pages
     private int[] zerocor = new int[2];
-    private int[] Laycor = new int[2];
+    private int[] BolLaycor = new int[2];
+    private int[] exitLaycor = new int[2];private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
     public static int vX, vY;
     @Override
@@ -856,6 +866,7 @@ public class Client extends AppCompatActivity {
             }
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             if (isDead) {
@@ -1127,7 +1138,37 @@ public class Client extends AppCompatActivity {
     }
 
     private void deleteLayout(String res) {
-        ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
+        transitionLayouts.add(bolLayout);
+        transitionLayouts.add(exitLayout);
+        if (bolLayout != null) {
+            if (Integer.parseInt(res.substring(1).split("l")[0]) == bolLayout) {
+                bolnitsaDescovered = false;
+            }
+        }
+        if (exitLayout != null) {
+            if (Integer.parseInt(res.substring(1).split("l")[0]) == exitLayout) {
+                exitDescovered = false;
+            }
+        }
+        if (transitionLayouts.contains(Integer.parseInt(res.substring(1).split("l")[0]))) {
+            transitionLayouts.remove(Integer.parseInt(res.substring(1).split("l")[0]));
+            HashMap<StartPage.TransperKey, StartPage.TransperValue> vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperKey k : vtk.keySet()) {
+                if (k.lname == Integer.parseInt(res.substring(1).split("l")[0])) {
+                    transitions.remove(k);
+                }
+            }
+            vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperValue v : vtk.values()) {
+                if (v.lname == Integer.parseInt(res.substring(1).split("l")[0])) {
+                    for (StartPage.TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
+                            transitions.remove(k);
+                        }
+                    }
+                }
+            }
+        }ConstraintLayout l = (ConstraintLayout) findViewById(R.id.Container);
         l.removeView(l.findViewWithTag((res+"n")));
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.p0l);
         maps.remove(layout.findViewWithTag(res));
@@ -1145,6 +1186,7 @@ public class Client extends AppCompatActivity {
         ThisLayout = LayoutNumber;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void river(int[] cord){
         switch (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]]) {
             case 11:{
@@ -1206,6 +1248,7 @@ public class Client extends AppCompatActivity {
         }
     }
     //TODO: simplify walking interface (triangle areas instead of rectangles)
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void go(int[] cord, int side){
         boolean b = false;
         switch (side){
@@ -1269,6 +1312,7 @@ public class Client extends AppCompatActivity {
         endMultiplTurn();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void GoEvents() {
         ImageView iv = (ImageView) findViewById(R.id.Me);
         delView(iv);
@@ -1288,9 +1332,210 @@ public class Client extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkHospital() {
         if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] == HOSPITAL) {
-            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+            if (!bolnitsaDescovered) {
+                bolLayout = ThisLayout;
+                BolLaycor[0] = CurBasicCord[0];
+                BolLaycor[1] = CurBasicCord[1];
+                bolnitsaDescovered = true;
+                changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+            } else {
+                if (!NativeLayout.equals(bolLayout)) {
+                    mergeLayouts(bolLayout, CurrentLayout);
+//                    if (NativeLayout.equals(bolLayout)) {
+//                        BolLaycor = CurBasicCord.clone();
+//                    }
+                    BolLaycor[0] = CurBasicCord[0];
+                    BolLaycor[1] = CurBasicCord[1];
+                    bolLayout = NativeLayout;
+                    bolnitsaDescovered = true;
+                }
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void mergeLayouts(Integer l1, Integer l2) {
+
+        transitionLayouts.add(bolLayout);
+        transitionLayouts.add(exitLayout);
+
+        moveTOnewlayout();
+
+        for (int i = 0; i < Maze.YourMazesholder.get(l1).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(l1)[0].length; j++) {
+                if (Maze.YourMazesholder.get(l1)[i][j] == -1) {
+                    Maze.YourMazesholder.get(l1)[i][j] = Maze.YourMazesholder.get(l2)[i][j];
+                }
+            }
+        }
+        Maze.YourMazesholder.replace(NativeLayout, Maze.YourMazesholder.get(l1));
+
+        for (int i = 0; i < Maze.YourMazesholder.get(NativeLayout).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(NativeLayout)[0].length; j++) {
+                if (Maze.YourMazesholder.get(NativeLayout)[i][j] != -1) {
+                    if (i % 2 == 1) {
+                        if (j % 2 == 1)
+                            changeCell(new int[]{i, j}, R.drawable.walls0);
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < Maze.YourMazesholder.get(NativeLayout).length; i++) {
+            for (int j = 0; j < Maze.YourMazesholder.get(NativeLayout)[0].length; j++) {
+                if (Maze.YourMazesholder.get(NativeLayout)[i][j] != -1) {
+                    if (i % 2 == 1) {
+                        if (j % 2 == 1)
+                            checkForContent(new int[]{i, j}, Maze.Maze);
+                        else {
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j - 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1rightpr, R.drawable.exitright, new int[]{i, j-1});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j + 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1leftpr, R.drawable.exitleft, new int[]{i, j+1});
+                            }
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j + 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1leftpr, R.drawable.exitleft, new int[]{i, j+1});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i][j - 1] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1rightpr, R.drawable.exitright, new int[]{i, j-1});
+                            }
+                        }
+                    } else {
+                        if (j % 2 == 1) {
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i - 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1downpr, R.drawable.exitdown, new int[]{i-1, j});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i + 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1uppr, R.drawable.exitup, new int[]{i+1, j});
+                            }
+                            try {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i + 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1uppr, R.drawable.exitup, new int[]{i+1, j});
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                if (Maze.YourMazesholder.get(NativeLayout)[i - 1][j] != -1)
+                                    checkForTheWalls(new int[]{i, j}, Maze.Maze, R.drawable.wall1downpr, R.drawable.exitdown, new int[]{i-1, j});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (transitionLayouts.contains(l1)) {
+            transitionLayouts.remove(l1);
+            transitionLayouts.add(NativeLayout);
+            HashMap<StartPage.TransperKey, StartPage.TransperValue> vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperKey k : vtk.keySet()) {
+                if (k.lname == l1) {
+                    StartPage.TransperKey k1 = new StartPage.TransperKey(NativeLayout, k.cord);
+                    transitions.put(k1, transitions.get(k));
+                    transitions.remove(k);
+                }
+            }
+            vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperValue v : vtk.values()) {
+                if (v.lname == l1) {
+                    for (StartPage.TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
+                            StartPage.TransperValue v1 = new StartPage.TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, v.cord2);
+                            transitions.replace(k, v1);
+                        }
+                    }
+                }
+            }
+        }
+        if (transitionLayouts.contains(l2)) {
+            transitionLayouts.remove(l2);
+            HashMap<StartPage.TransperKey, StartPage.TransperValue> vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperKey k : vtk.keySet()) {
+                if (k.lname == l2) {
+                    StartPage.TransperKey k1 = new StartPage.TransperKey(NativeLayout, k.cord);
+                    transitions.put(k1, transitions.get(k));
+                    transitions.remove(k);
+                }
+            }
+            vtk = (HashMap<StartPage.TransperKey, StartPage.TransperValue>) transitions.clone();
+            for (StartPage.TransperValue v : vtk.values()) {
+                if (v.lname == l2) {
+                    for (StartPage.TransperKey k : vtk.keySet()) {
+                        if (Objects.requireNonNull(transitions.get(k)).equals(v)) {
+                            StartPage.TransperValue v1 = new StartPage.TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, v.cord2);
+                            transitions.replace(k, v1);
+                        }
+                    }
+                }
+            }
+        }
+        deleteLayout("p"+l1+"l");
+        deleteLayout("p"+l2+"l");
+    }
+
+    private void checkForContent(int[] cord, int[][] maze) {
+        switch (maze[cord[0]][cord[1]]) {
+            case 11: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 12: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 13: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case 14: {
+                changeCell(cord, R.drawable.river);
+                break;
+            }
+            case DEAD_MINOTAUR: {
+                changeCell(cord, R.drawable.deadminotavr);
+                break;
+            }
+            case MINOTAUR: {
+                changeCell(cord, R.drawable.minotavr);
+                break;
+            }
+            case HOSPITAL: {
+                changeCell(cord, R.drawable.hospital);
+                break;
+            }
+            case BFG: {
+                changeCell(cord, R.drawable.bfg);
+                break;
+            }
+            case BULLET: {
+                changeCell(cord, R.drawable.bullet);
+                break;
+            }
+            case KEY: {
+                changeCell(cord, R.drawable.key);
+                break;
+            }
+            default:{
+                if (maze[cord[0]][cord[1]] > TELEPORT && maze[cord[0]][cord[1]] < 1000){
+                    changeCell(cord, R.drawable.teleport1);
+                }
+            }
+        }
+    }
+
+    private void checkForTheWalls(int[] cord, int[][] maze, int res, int res1, int[] placecord) {
+        switch (maze[cord[0]][cord[1]]) {
+            case 1: {
+                changeCell(placecord, res);
+                break;
+            }
+            case 2: {
+                changeCell(placecord, res1);
+                break;
+            }
         }
     }
 
@@ -1339,15 +1584,49 @@ public class Client extends AppCompatActivity {
         isAnYkey = false;
         Toast t = Toast.makeText(getApplicationContext(), "You were killed", Toast.LENGTH_SHORT);
         t.show();
-        moveTOnewlayout();
-        Maze.YourCordInMaze[0] = Maze.hospital.get(HOSPITAL)[0];
-        Maze.YourCordInMaze[1] = Maze.hospital.get(HOSPITAL)[1];
-        CurBasicCord[0] = Maze.YourCordInMaze[0];
-        CurBasicCord[1] = Maze.YourCordInMaze[1];
-        Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
-        changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+        if (bolnitsaDescovered) {
+            MoveToKnownLayout(Objects.requireNonNull(Maze.hospital.get(HOSPITAL)), BolLaycor, bolLayout);
+        } else {
+            BolLaycor[0] = Objects.requireNonNull(Maze.hospital.get(HOSPITAL))[0];
+            BolLaycor[1] = Objects.requireNonNull(Maze.hospital.get(HOSPITAL))[1];
+            moveTOnewlayout();
+            bolnitsaDescovered = true;
+            bolLayout = ThisLayout;
+            KnownLayoutPrep(Objects.requireNonNull(Maze.hospital.get(HOSPITAL)));
+            CurBasicCord[0] = Maze.YourCordInMaze[0];
+            CurBasicCord[1] = Maze.YourCordInMaze[1];
+            Maze.YourMazesholder.get(NativeLayout)[CurBasicCord[0]][CurBasicCord[1]] = 0;
+            changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.hospital);
+        }
     }
 
+    private void MoveToKnownLayout(int[] basicCord, int[] lcord, int bolLayout) {
+        moveTOtheLayoutKnown(bolLayout);
+        KnownLayoutPrep(basicCord);
+        CurBasicCord[0] = lcord[0];
+        CurBasicCord[1] = lcord[1];
+        changeTagIdCell(Maze.YourCordInMaze, R.drawable.milkiipidoras);
+        changeIdCell(Maze.YourCordInMaze, R.drawable.milkiipidoras, R.id.Me);
+    }
+
+    private void KnownLayoutPrep(int[] cord) {
+        Maze.YourCordInMaze[0] = cord[0];
+        Maze.YourCordInMaze[1] = cord[1];
+    }
+
+    private void moveTOtheLayoutKnown(int bolLayout) {
+        ImageView iMv = (ImageView) findViewById(R.id.Me);
+        delView(iMv);
+        ImageView iMvc = (ImageView) findViewById(R.id.Mec);
+        delTagView(iMvc);
+        setLayoutAScurrent(bolLayout);
+        CurrentLayout = bolLayout;
+        NativeLayout = CurrentLayout;
+        goToThisLayout(bolLayout);
+        ThisLayout = NativeLayout;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void goFORriver(int[] cord, int side){
         switch (side){
             case 1: {
@@ -1373,7 +1652,33 @@ public class Client extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void finishgame(){
+
+        if (!exitDescovered) {
+            exitLayout = ThisLayout;
+            exitLaycor[0] = CurBasicCord[0];
+            exitLaycor[1] = CurBasicCord[1];
+            exitDescovered = true;
+        } else {
+            if (!NativeLayout.equals(exitLayout)) {
+                boolean isbol = false;
+                if (NativeLayout.equals(bolLayout)) {
+                    isbol = true;
+                }
+                mergeLayouts(exitLayout, CurrentLayout);
+                if (isbol) {
+                    bolLayout = NativeLayout;
+                    bolnitsaDescovered = true;
+                    BolLaycor = CurBasicCord.clone();
+                }
+                exitLaycor[0] = CurBasicCord[0];
+                exitLaycor[0] = CurBasicCord[1];
+                exitLayout = NativeLayout;
+                exitDescovered = true;
+            }
+        }
+
         if (Maze.isKey){
             if (isAnYkey) {
                 Toast t = Toast.makeText(getApplicationContext(), "You won", Toast.LENGTH_SHORT);
@@ -1412,16 +1717,44 @@ public class Client extends AppCompatActivity {
             }
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkTheRvrORtp(){
         if ((Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] < TELEPORT) && (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > 10)) {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.river);
-            river(Maze.YourCordInMaze);
+            StartPage.TransperKey transper = new StartPage.TransperKey(NativeLayout, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+            if (transitions.containsKey(transper)) {
+                MoveToKnownLayout(new int[] {Objects.requireNonNull(transitions.get(transper)).cord2[0], Objects.requireNonNull(transitions.get(transper)).cord2[1]}, new int[]{Objects.requireNonNull(transitions.get(transper)).cord[0], Objects.requireNonNull(transitions.get(transper)).cord[1]}, Objects.requireNonNull(transitions.get(transper)).lname);
+            } else {
+                if (transitionLayouts.contains(NativeLayout) || NativeLayout.equals(bolLayout) || NativeLayout.equals(exitLayout)) {
+                    transitions.put(transper, null);
+                    river(Maze.YourCordInMaze);
+                    StartPage.TransperValue transperValue = new StartPage.TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                    transitions.replace(transper, transperValue);
+                    transitionLayouts.add((Integer) NativeLayout);
+                } else {
+                    river(Maze.YourCordInMaze);
+                }
+            }
         } else if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > TELEPORT) {
             changeCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.teleport1);
-            teleport(Maze.YourCordInMaze);
+            StartPage.TransperKey transper = new StartPage.TransperKey(NativeLayout, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+            if (transitions.containsKey(transper)) {
+                MoveToKnownLayout(new int[] {Objects.requireNonNull(transitions.get(transper)).cord2[0], Objects.requireNonNull(transitions.get(transper)).cord2[1]}, new int[]{Objects.requireNonNull(transitions.get(transper)).cord[0], Objects.requireNonNull(transitions.get(transper)).cord[1]}, Objects.requireNonNull(transitions.get(transper)).lname);
+            } else {
+                if (transitionLayouts.contains(NativeLayout) || NativeLayout.equals(bolLayout) || NativeLayout.equals(exitLayout)) {
+                    transitions.put(transper, null);
+                    teleport(Maze.YourCordInMaze);
+                    StartPage.TransperValue transperValue = new StartPage.TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                    transitions.replace(transper, transperValue);
+                    transitionLayouts.add((Integer) NativeLayout);
+                } else {
+                    teleport(Maze.YourCordInMaze);
+                }
+            }
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void checkTheRvrORtpFORriver(){
         if ((Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] < TELEPORT) && (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] > 10)) {
             river(Maze.YourCordInMaze);
@@ -1514,11 +1847,25 @@ public class Client extends AppCompatActivity {
         delTagView(ivc);
         changeTagIdCell(new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]}, R.drawable.milkiipidoras);
     }
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void turn(int side) {
         switch (side) {
             case TURN_NA: {
                 if (Maze.Maze[Maze.YourCordInMaze[0]][Maze.YourCordInMaze[1]] >= TELEPORT) {
-                    teleport(Maze.YourCordInMaze);
+                    StartPage.TransperKey transper = new StartPage.TransperKey(NativeLayout, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                    if (transitions.containsKey(transper)) {
+                        MoveToKnownLayout(new int[] {Objects.requireNonNull(transitions.get(transper)).cord2[0], Objects.requireNonNull(transitions.get(transper)).cord2[1]}, new int[]{Objects.requireNonNull(transitions.get(transper)).cord[0], Objects.requireNonNull(transitions.get(transper)).cord[1]}, Objects.requireNonNull(transitions.get(transper)).lname);
+                    } else {
+                        if (transitionLayouts.contains(NativeLayout) || NativeLayout.equals(bolLayout) || NativeLayout.equals(exitLayout)) {
+                            transitions.put(transper, null);
+                            teleport(Maze.YourCordInMaze);
+                            StartPage.TransperValue transperValue = new StartPage.TransperValue(NativeLayout, new int[]{CurBasicCord[0], CurBasicCord[1]}, new int[]{Maze.YourCordInMaze[0], Maze.YourCordInMaze[1]});
+                            transitions.replace(transper, transperValue);
+                            transitionLayouts.add((Integer) NativeLayout);
+                        } else {
+                            teleport(Maze.YourCordInMaze);
+                        }
+                    }
                 }
                 break;
             }
