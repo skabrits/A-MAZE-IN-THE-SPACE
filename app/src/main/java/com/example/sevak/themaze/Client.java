@@ -1,11 +1,15 @@
 package com.example.sevak.themaze;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.NetworkOnMainThreadException;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
@@ -18,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -51,18 +57,39 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 import static com.example.sevak.themaze.MazeHolder.sharedPreferencesForMholder;
 
 public class Client extends AppCompatActivity {
 
+    Thread threadS;
+    Thread threadC;
+    Thread trBroad;
+    Thread trBroad1;
+    Thread threadCatch;
+
+    public static HashMap<String, String> avalibleServers = new HashMap<>();
+
     private int[] keyCords = new int[] {-1, -1};
     private Set<List<Integer>> killstreat = new HashSet<List<Integer>>();
 
+    static HashSet<String> runningServIPcontainer = new HashSet<>();
+    static HashMap<String, Boolean> runningServs = new HashMap<String, Boolean>();
+    private BlockingQueue<String> sendEvent = new ArrayBlockingQueue<String>(1, true);
+    public static BlockingQueue<String> gotBroadCast = new ArrayBlockingQueue<String>(1, true);
+
+    private String chsrv;
     private int chmap = -1;
+
     private int Mazenom = -1;
+
+    private TextView currentTextViewServ = null;
     private TextView currentTextView = null;
 
+    static Boolean shutS = false;
     static Boolean isSent = false;
     static Boolean isMyTurn = false;
     static Boolean isDead = false;
@@ -81,7 +108,7 @@ public class Client extends AppCompatActivity {
     BufferedReader socketReader; // буферизированный читатель с сервера
     BufferedWriter socketWriter; // буферизированный писатель на сервер
     BufferedReader userInput; // буферизированный читатель пользовательского ввода с консоли
-    private Boolean isFirstConnect = true;
+    static Boolean isFirstConnect = true;
     private Boolean LoginUsed = false;
     static Boolean ServnotgotMazenom = false;
 
@@ -96,7 +123,19 @@ public class Client extends AppCompatActivity {
     private void runClient(String host, int port) throws IOException {
         s = new Socket(host, port); // создаем сокет
         // создаем читателя и писателя в сокет с дефолной кодировкой UTF-8
+        isMyTurn = false;
+        runningServs.clear();
+        avalibleServers.clear();
+        runningServIPcontainer.clear();
+        shutS = false;
+        isFirstConnect = true;
+        isSent = false;
         isMultiplayer = true;
+        try {
+            clBlock.put(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         socketReader = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
         socketWriter = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), "UTF-8"));
         // создаем читателя с консоли (от пользователя)
@@ -159,7 +198,16 @@ public class Client extends AppCompatActivity {
 //            }
 //        }
         while (true) {
-            if (isFirstConnect && isServBase && ServnotgotMazenom){
+
+            String ev = null;
+            try {
+                ev = sendEvent.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            assert ev != null;
+            if (ev.equals("ServHoldFirstCon")){
                 try {
                     Gson gson = new Gson();
                     Thread.sleep(3000);
@@ -173,7 +221,7 @@ public class Client extends AppCompatActivity {
                 }
             }
 
-            if (Rmazeneed) {
+            if (ev.equals("ClientFirstCon")) {
                 Rmazeneed = false;
                 try {
                     socketWriter.write("\\\\rmaze_nom:"); //пишем строку пользователя
@@ -184,7 +232,8 @@ public class Client extends AppCompatActivity {
                 }
             }
 
-            if (!isMyTurn && !isSent && !isFirstConnect) {
+            if (ev.equals("TurnEnd")) {
+                System.out.println("turn end");
                 isSent = true;
                 Gson gson = new Gson();
                 try {
@@ -207,7 +256,7 @@ public class Client extends AppCompatActivity {
         if (!s.isClosed()) { // проверяем, что сокет не закрыт...
             try {
                 s.close(); // закрываем...
-                System.exit(0); // выходим!
+                //System.exit(0); // выходим!
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }
@@ -260,6 +309,7 @@ public class Client extends AppCompatActivity {
 //                        } catch (IOException e) {}
 //                    }
                 } else if (line.split("//////")[0].equals("\\\\your_turn:")) {
+                    System.out.println("recive turn");
                     isMyTurn = true;
                     isSent = false;
                     if (hasUsedKnife != 0) {
@@ -281,17 +331,35 @@ public class Client extends AppCompatActivity {
                         keyCords = new int[] {-1, -1};
                     }
                 } else if (line.split("//////")[0].equals("\\\\maze_nom:")) {
-                    isMazegot = true;
                     Gson gson = new Gson();
-                    MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
-                    Mazenom = MazeHolder.MazeArr.size() - 1;
+                    if (gson.fromJson(line.split("//////")[1], MazeExample.class) != null) {
+                        try {
+                            clgotMaze.put(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        isMazegot = true;
+                        MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
+                        Mazenom = MazeHolder.MazeArr.size() - 1;
+                        System.out.println("recive mazn");
 
-                    SharedPreferences sharedPreferencesForMholder;
-                    sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
-                    SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
-                    ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
-                    ed.apply();
+                        if (SutdownServ.wantToDownload) {
+                            System.out.println("recive mazn dwn");
+                            SharedPreferences sharedPreferencesForMholder;
+                            sharedPreferencesForMholder = getSharedPreferences("mazehold", MODE_PRIVATE);
+                            SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+                            ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+                            ed.apply();
+                        }
+                    } else {
+                        String message = "Unable to connect. Server is not fully set up?";
+                        Message msg = Message.obtain(); // Creates an new Message instance
+                        msg.obj = message; // Put the string into Message, into "obj" field.
+
+                        hToaster.sendMessage(msg);
+                    }
                 } else if (line.split("//////")[0].equals("\\\\amaze_nom:")) {
+                    System.out.println("recive ama");
                     if (line.split("//////")[1].equals("okay")) {
                         ServnotgotMazenom = false;
                     }
@@ -317,6 +385,13 @@ public class Client extends AppCompatActivity {
     private HashSet<Integer> transitionLayouts = new HashSet<>();
     private HashMap<Integer, StartPage.TransperKey[]> transread = new HashMap<>();
     private HashMap<StartPage.TransperKey, StartPage.TransperValue> transitions = new HashMap<>();
+    public static BlockingQueue<Integer> servBlock = new ArrayBlockingQueue<Integer>(1, true);
+    public static BlockingQueue<Integer> clBlock = new ArrayBlockingQueue<Integer>(1, true);
+    public static BlockingQueue<Integer> clgotMaze = new ArrayBlockingQueue<Integer>(1, true);
+
+    public static LinearLayout getSC(LinearLayout sc){
+        return sc;
+    }
 
     public static final int CELLSIZE = 140;
     public static final int TURN_NA = 0;
@@ -352,10 +427,39 @@ public class Client extends AppCompatActivity {
     private int[] exitLaycor = new int[2];private int[] Laycor = new int[2];
     private int[] CurBasicCord  = new int[2];
     public static int vX, vY;
+
+    private Handler hToaster;
+
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_shlus);
+        isMyTurn = false;
+        isServBase = false;
+        isMultiplayer = false;
+        runningServs.clear();
+        avalibleServers.clear();
+        runningServIPcontainer.clear();
+        shutS = false;
+        isFirstConnect = true;
+        isSetupFineshed = false;
+        isSent = false;
+        SutdownServ.wantToDownload = false;
+        servBlock.clear();
+        clBlock.clear();
+        clgotMaze.clear();
+        sendEvent.clear();
+        gotBroadCast.clear();
+
+
+
+        hToaster = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                Toast t = Toast.makeText(getApplicationContext(), msg.obj.toString(), Toast.LENGTH_SHORT);
+                t.show();
+            }
+        };
 
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -367,112 +471,265 @@ public class Client extends AppCompatActivity {
         mDetector = new GestureDetector(this, new MyGestureListenerForMultiplayer());
 
         findViewById(R.id.Create_Server).setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                Thread threadS = new Thread(null, new Runnable() {
+                threadS = new Thread(null, new Runnable() {
                     @Override
                     public void run() {
                         try {
+                            SutdownServ.shutdown = false;
                             new Server(8080).run();
                         } catch (IOException e) {
                             e.printStackTrace();
+                            String message = "Unable to run server.";
+                            SutdownServ.shutdown = true;
+                            Message msg = Message.obtain(); // Creates an new Message instance
+                            msg.obj = message; // Put the string into Message, into "obj" field.
+
+                            hToaster.sendMessage(msg);
                         }
                     }
                 });
                 threadS.start();
 
-                Thread threadC = new Thread(null, new Runnable() {
+                threadC = new Thread(null, new Runnable() {
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void run() {
                         try {
                             runClient(InetAddress.getLocalHost().getHostAddress(), 8080); // Пробуем приконнетиться...
                         } catch (IOException e) { // если объект не создан...
+                            try {
+                                clBlock.put(0);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+
                             System.out.println("Unable to connect. Server not running?"); // сообщаем...
-//                            Toast t = Toast.makeText(getApplicationContext(), "Unable to connect. Server not running?", Toast.LENGTH_SHORT);
-//                            t.show();
+
+                            String message = "Unable to connect. Server not running?";
+                            Message msg = Message.obtain(); // Creates an new Message instance
+                            msg.obj = message; // Put the string into Message, into "obj" field.
+
+                            hToaster.sendMessage(msg);
                         } catch (NetworkOnMainThreadException e){
                             System.out.println("Unable to connect. Server not running?"); // сообщаем...
-//                            Toast t = Toast.makeText(getApplicationContext(), "Unable to connect. Server not running?", Toast.LENGTH_SHORT);
-//                            t.show();
+
+                            String message = "Unable to connect. Server not running?";
+                            Message msg = Message.obtain(); // Creates an new Message instance
+                            msg.obj = message; // Put the string into Message, into "obj" field.
+
+                            hToaster.sendMessage(msg);
                         }
                     }
                 });
 
-//                int eca = 0;
-//                while (!isServBase || eca < 10) {
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    eca += 1;
-//                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                threadC.start();
-
-//                eca = 0;
-//
-//                while (!isMultiplayer || eca < 10) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-//                    eca += 1;
-//                }
-                if (isMultiplayer) {
-                    predbannikAct();
-                }
-            }
-        });
-        findViewById(R.id.Connect_to_Server).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Thread threadC = new Thread(null, new Runnable() {
-                    @RequiresApi(api = Build.VERSION_CODES.N)
-                    @Override
-                    public void run() {
-                        try {
-                            runClient(((EditText) findViewById(R.id.Server_port)).getText().toString(), 8080); // Пробуем приконнетиться...
-                        } catch (IOException e) { // если объект не создан...
-                            System.out.println("Unable to connect. Server not running?"); // сообщаем...
-                        }
-                    }
-                });
-                threadC.start();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                Rmazeneed = true;
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (!isMazegot) {
+                while (!isServBase) {
                     try {
-                        Thread.sleep(1000);
+                        servBlock.take();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    if (isServBase) {
+                        threadC.start();
+                    }
                 }
 
-                if (isMultiplayer && isMazegot) {
-                    Maze.rand = Mazenom;
-                    startPageAct();
+                Integer a = null;
+                while (!isMultiplayer) {
+                    try {
+                        a = clBlock.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
+                    if (a == 0) {
+                        break;
+                    }
+
+                    if (isMultiplayer && isServBase) {
+                        trBroad = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                while (true) {
+                                    Intent servintent = new Intent("\\\\SERV");
+                                    String a = "";
+                                    if (findViewById(R.id.server_name) != null) {
+                                        a = ((TextView) findViewById(R.id.server_name)).getText().toString();
+                                    }
+                                    if (a.length() < 1) {
+                                        a = "Sever_mobile";
+                                    }
+                                    servintent.putExtra("name", a);
+                                    servintent.putExtra("ipv4", Utils.getIPAddress(true));
+                                    servintent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                                    sendBroadcast(servintent);
+
+                                    try {
+                                        Thread.sleep(400);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                        trBroad.start();
+                        threadCatch.interrupt();
+                        predbannikAct();
+                    }
+                }
+            }
+        });
+
+        @SuppressLint("HandlerLeak") Handler removeV = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+                sc.removeAllViews();
+            }
+        };
+
+        @SuppressLint("HandlerLeak") Handler h = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if (findViewById(R.id.ServChooser) != null) {
+                    LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+
+                View[] a = new View[sc.getChildCount()];
+                for (int i = 0; i < sc.getChildCount(); i++) {
+                    a[i] = sc.getChildAt(i);
+                }
+
+                for (int i = 0; i < a.length; i++) {
+                    if (avalibleServers.get(((TextView) sc.getChildAt(i)).getText().toString().split(" ")[3]) == null) {
+                        sc.removeView(a[i]);
+                    }
+                }
+
+                    for (String i : avalibleServers.keySet()) {
+                        if (sc.findViewWithTag(i) == null) {
+                            TextView txt = new TextView(getApplicationContext());
+                            txt.setTag(i);
+                            txt.setText("NAME: " + avalibleServers.get(i) + ", IP: " + i);
+                            txt.setTextSize(25);
+                            txt.setPadding(50, 20, 10, 10);
+                            txt.setTextColor(Color.GREEN);
+                            RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
+                                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                                    ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                            sc.addView(txt, rules);
+                            txt.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (currentTextViewServ != null) {
+                                        currentTextViewServ.setTextColor(Color.GREEN);
+                                    }
+                                    chsrv = i;
+                                    txt.setTextColor(Color.YELLOW);
+                                    currentTextViewServ = txt;
+                                }
+                            });
+                        }
+                    }
+                }
+            };
+        };
+
+        threadCatch = new Thread(null, new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void run() {
+                removeV.sendEmptyMessage(1);
+                while (true) {
+                    try {
+                        gotBroadCast.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    h.sendEmptyMessage(1);
+                }
+            }
+        });
+        threadCatch.start();
+
+        ((CheckBox) findViewById(R.id.DOWNL)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    SutdownServ.wantToDownload = true;
+                } else {
+                    SutdownServ.wantToDownload = false;
+                }
+            }
+        });
+
+        findViewById(R.id.Connect_to_Server).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                threadC = new Thread(null, new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void run() {
+
+                        try {
+                            runClient(chsrv, 8080); // Пробуем приконнетиться...
+                        } catch (IOException e) { // если объект не создан...
+                            try {
+                                clBlock.put(0);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            System.out.println("Unable to connect. Server not running?"); // сообщаем...
+
+                            String message = "Unable to connect. Server not running?";
+                            Message msg = Message.obtain(); // Creates an new Message instance
+                            msg.obj = message; // Put the string into Message, into "obj" field.
+
+                            hToaster.sendMessage(msg);
+                        }
+                    }
+                });
+                threadC.start();
+
+                Integer a = null;
+                while (!isMultiplayer) {
+                    try {
+                        a = clBlock.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (a == 0) {
+                        break;
+                    }
+
+                    if (isMultiplayer) {
+                        try {
+                            sendEvent.put("ClientFirstCon");
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Rmazeneed = true;
+                    }
+                }
+
+
+                while (!isMazegot) {
+                    if (a == 0) {
+                        break;
+                    }
+                    try {
+                        clgotMaze.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (isMultiplayer && isMazegot) {
+                        Maze.rand = Mazenom;
+                        threadCatch.interrupt();
+                        startPageAct();
+
+                    }
                 }
             }
         });
@@ -502,12 +759,13 @@ public class Client extends AppCompatActivity {
             findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    KillCNS();
                     startActivity(new Intent(getApplicationContext(), Client.class));
                 }
             });
             String IP = Utils.getIPAddress(true);
-            System.out.println(IP);
-            Thread threadservinfo = new Thread(null, new Runnable() {
+            System.out.println(IP+": IP");
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ((TextView) findViewById(R.id.Server_IP)).setText(IP);
@@ -515,20 +773,49 @@ public class Client extends AppCompatActivity {
 
                 }
             });
-            threadservinfo.start();
-            if (isGotServInfo) {
-                threadservinfo.interrupt();
-                isSetupFineshed = true;
-            }
+
+            isSetupFineshed = true;
+
             findViewById(R.id.Play).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    BroadcastExchange();
                     startPageAct();
                 }
             });
         }
     }
 
+    private void KillCNS() {
+        close();
+        ServerKill();
+    }
+
+    private void BroadcastExchange() {
+        trBroad.interrupt();
+        trBroad1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 100; i++) {
+                    Intent servintent = new Intent("\\\\SERVDIED");
+                    servintent.putExtra("name", "nm");
+                    servintent.putExtra("ipv4", Utils.getIPAddress(true));
+                    servintent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    sendBroadcast(servintent);
+
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Thread.currentThread().interrupt();
+            }
+        });
+        trBroad1.start();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void predbannikAct() {
 
         setContentView(R.layout.activity_multiplayer_predbannik);
@@ -536,6 +823,7 @@ public class Client extends AppCompatActivity {
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                KillCNS();
                 startActivity(new Intent(getApplicationContext(), Client.class));
             }
         });
@@ -544,11 +832,20 @@ public class Client extends AppCompatActivity {
 
         LinearLayout mc = (LinearLayout) findViewById(R.id.MapChooser);
 
+//        MazeHolder.MazeArr.removeIf(Objects::isNull);
+//
+//        Gson gson = new Gson();
+//
+//        SharedPreferences sharedPreferences = getSharedPreferences("mazehold", MODE_PRIVATE);
+//        SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+//        ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+//        ed.apply();
+//
         mc.removeAllViews();
 
         for (int i = 0; i < MazeHolder.MazeArr.size(); i++) {
             TextView txt = new TextView(getApplicationContext());
-            txt.setTag(MazeHolder.MazeArr.get(i).name);
+            txt.setTag(i);
             txt.setText(MazeHolder.MazeArr.get(i).name);
             txt.setTextSize(25);
             txt.setPadding(50, 20, 10, 10);
@@ -589,7 +886,7 @@ public class Client extends AppCompatActivity {
                     t.show();
                     Gson gson = new Gson();
                     TextView txt = new TextView(getApplicationContext());
-                    txt = (TextView) mc.findViewWithTag(MazeHolder.MazeArr.get(finalI1).name);
+                    txt = (TextView) mc.findViewWithTag(finalI1);
                     mc.removeView(txt);
                     SharedPreferences sharedPreferences = getSharedPreferences("mazehold", MODE_PRIVATE);
                     SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
@@ -614,6 +911,11 @@ public class Client extends AppCompatActivity {
                 }
                 Predban = true;
                 ServnotgotMazenom = true;
+                try {
+                    sendEvent.put("ServHoldFirstCon");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 runServer_clientStartpage();
             }
@@ -634,12 +936,22 @@ public class Client extends AppCompatActivity {
         });
     }
 
+    private void ServerKill() {
+        BroadcastExchange();
+        shutS = true;
+        SutdownServ.shutdown = true;
+    }
+
     private void startPageAct() {
         setContentView(R.layout.activity_multiplayer_start_page);
 
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                close();
+                if (isServBase) {
+                    ServerKill();
+                }
                 startActivity(new Intent(getApplicationContext(), Client.class));
             }
         });
@@ -967,6 +1279,11 @@ public class Client extends AppCompatActivity {
 
     private void endMultiplTurn() {
         isMyTurn = false;
+        try {
+            sendEvent.put("TurnEnd");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         isFirstConnect = false;
     }
 

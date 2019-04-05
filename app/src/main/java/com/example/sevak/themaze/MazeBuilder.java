@@ -514,7 +514,7 @@ public class MazeBuilder extends AppCompatActivity {
                 private Boolean checkWAS(int finalI, int[] cord) {
                     Boolean res;
                     res = true;
-                    if (TMaze[cord[0]*2+1][cord[1]*2+1] != 0) {
+                    if (TMaze[cord[0]*2+1][cord[1]*2+1] != 0 || (BC[0] == cord[0]*2+1 && BC[1] == cord[1]*2+1)) {
                         res = false;
                     }
                     return res;

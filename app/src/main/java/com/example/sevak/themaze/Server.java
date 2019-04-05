@@ -46,9 +46,40 @@ public class Server {
      * @throws IOException Если не удасться создать сервер-сокет, вылетит по эксепшену, объект Сервера не будет создан
      */
     public Server(int port) throws IOException {
-        Client.isServBase = true;
         ss = new ServerSocket(port); // создаем сервер-сокет
         this.port = port; // сохраняем порт.
+        Client.isServBase = true;
+        try {
+            Client.servBlock.put(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Client.isMyTurn = false;
+        Client.runningServs.clear();
+        Client.avalibleServers.clear();
+        Client.runningServIPcontainer.clear();
+        Client.shutS = false;
+        Client.isFirstConnect = true;
+        Client.isSent = false;
+        Thread checkforsd = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (SutdownServ.shutdown) { // если поступила команда "погасить сервер", то...
+                        serverThread.interrupt(); // сначала возводим флаг у северной нити о необходимости прерваться.
+//                        try {
+                        shutdownServer();
+                            //new Socket("10.1.201.104", port); // создаем фейк-коннект (чтобы выйти из .accept())
+//                        } catch (IOException ignored) { //ошибки неинтересны
+//                        } finally {
+//                            shutdownServer(); // а затем глушим сервер вызовом его метода shutdownServer().
+//                        }
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        });
+        checkforsd.start();
     }
 
     /**
@@ -150,7 +181,7 @@ public class Server {
 
                 if (line == null) { // если строка null - клиент отключился в штатном режиме.
                     close(); // то закрываем сокет
-                } else if ("\\\\shutdown".equals(line)) { // если поступила команда "погасить сервер", то...
+                } else if (Client.shutS) { // если поступила команда "погасить сервер", то...
                     serverThread.interrupt(); // сначала возводим флаг у северной нити о необходимости прерваться.
                     try {
                         new Socket("10.1.201.104", port); // создаем фейк-коннект (чтобы выйти из .accept())
@@ -271,8 +302,10 @@ public class Server {
 
         private void nextTURNsend(String line, SocketProcessor sp, Gson gson) {
             if (keyOwner == null) {
+                System.out.println("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s) + "//////" + gson.toJson(keyCords));
                 sp.send("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s) + "//////" + gson.toJson(keyCords));
             } else {
+                System.out.println("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s));
                 sp.send("\\\\your_turn://////" + line.split("//////")[1] + "//////" + players_condition.get(sp.s));
             }
         }

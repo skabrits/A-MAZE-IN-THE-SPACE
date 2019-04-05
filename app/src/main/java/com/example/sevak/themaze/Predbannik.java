@@ -45,13 +45,43 @@ public class Predbannik extends AppCompatActivity {
 
         MazeHolder.init(getApplicationContext());
 
+        Func();
+
+        ImageView rand = (ImageView) findViewById(R.id.random);
+        rand.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Random r = new Random();
+                if (MazeHolder.MazeArr.size() == 1){
+                    Maze.rand = 0;
+                } else {
+                    Maze.rand = r.nextInt(MazeHolder.MazeArr.size() - 1);
+                }
+                startActivity(new Intent(getApplicationContext(), StartPage.class));
+            }
+        });
+        ImageView chose = (ImageView) findViewById(R.id.chooselayout);
+        chose.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                if (chmap != -1) {
+                    Maze.rand = chmap;
+                    startActivity(new Intent(getApplicationContext(), StartPage.class));
+                }
+            }
+        });
+    }
+
+    private void Func() {
         LinearLayout mc = (LinearLayout) findViewById(R.id.MapChooser);
 
         mc.removeAllViews();
 
         for (int i = 0; i < MazeHolder.MazeArr.size(); i++) {
             TextView txt = new TextView(this);
-            txt.setTag(MazeHolder.MazeArr.get(i).name);
+            txt.setTag(i);
             txt.setText(MazeHolder.MazeArr.get(i).name);
             txt.setTextSize(25);
             txt.setPadding(50, 20, 10, 10);
@@ -92,7 +122,7 @@ public class Predbannik extends AppCompatActivity {
                     t.show();
                     Gson gson = new Gson();
                     TextView txt = new TextView(getApplicationContext());
-                    txt = (TextView) mc.findViewWithTag(MazeHolder.MazeArr.get(finalI1).name);
+                    txt = (TextView) mc.findViewWithTag(finalI1);
                     mc.removeView(txt);
                     SharedPreferences sharedPreferences = getSharedPreferences("mazehold", MODE_PRIVATE);
                     SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
@@ -103,31 +133,5 @@ public class Predbannik extends AppCompatActivity {
                 }
             });
         }
-
-        ImageView rand = (ImageView) findViewById(R.id.random);
-        rand.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Random r = new Random();
-                if (MazeHolder.MazeArr.size() == 1){
-                    Maze.rand = 0;
-                } else {
-                    Maze.rand = r.nextInt(MazeHolder.MazeArr.size() - 1);
-                }
-                startActivity(new Intent(getApplicationContext(), StartPage.class));
-            }
-        });
-        ImageView chose = (ImageView) findViewById(R.id.chooselayout);
-        chose.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                if (chmap != -1) {
-                    Maze.rand = chmap;
-                    startActivity(new Intent(getApplicationContext(), StartPage.class));
-                }
-            }
-        });
     }
 }

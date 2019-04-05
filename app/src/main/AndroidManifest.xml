@@ -12,6 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver
+            android:name=".LANServDownReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="\\\\SERVDIED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".LANServsResiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="\\\\SERV" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
@@ -40,7 +57,7 @@
         <activity android:name=".Catsciene" />
         <activity android:name=".StartPageCampaign" />
         <activity android:name=".EditMapShlus" />
-        <activity android:name=".EditorChooser"></activity>
+        <activity android:name=".EditorChooser" />
     </application>
 
 </manifest>
