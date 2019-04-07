@@ -42,6 +42,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -51,6 +53,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +73,9 @@ public class Client extends AppCompatActivity {
     Thread trBroad;
     Thread trBroad1;
     Thread threadCatch;
+    Thread broadcastListening;
+
+    EchoServer echoServer;
 
     public static HashMap<String, String> avalibleServers = new HashMap<>();
 
@@ -210,19 +216,21 @@ public class Client extends AppCompatActivity {
             if (ev.equals("ServHoldFirstCon")){
                 try {
                     Gson gson = new Gson();
-                    Thread.sleep(3000);
                     socketWriter.write("\\\\maze_nom://////" + gson.toJson((MazeExample) (MazeHolder.MazeArr.get(Maze.rand)))); //пишем строку пользователя
                     socketWriter.write("\n"); //добавляем "новою строку", дабы readLine() сервера сработал
                     socketWriter.flush(); // отправляем
                 } catch (IOException e) {
                     close(); // в любой ошибке - закрываем.
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
 
             if (ev.equals("ClientFirstCon")) {
                 Rmazeneed = false;
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 try {
                     socketWriter.write("\\\\rmaze_nom:"); //пишем строку пользователя
                     socketWriter.write("\n"); //добавляем "новою строку", дабы readLine() сервера сработал
@@ -253,6 +261,7 @@ public class Client extends AppCompatActivity {
      * программы (это единственный  выход прервать работу BufferedReader.readLine(), на ожидании пользователя)
      */
     public synchronized void close() {//метод синхронизирован, чтобы исключить двойное закрытие.
+        isMultiplayer = false;
         if (!s.isClosed()) { // проверяем, что сокет не закрыт...
             try {
                 s.close(); // закрываем...
@@ -289,10 +298,12 @@ public class Client extends AppCompatActivity {
                         break;
                     }
                     System.out.println("Connection lost"); // а сюда мы попадем в случае ошибок сети.
+                    startActivity(new Intent(getApplicationContext(), Client.class));
                     close(); // ну и закрываем сокет (кстати, вызвается метод класса ChatClient, есть доступ)
                 }
                 if (line == null) {  // строка будет null если сервер прикрыл коннект по своей инициативе, сеть работает
                     System.out.println("Server has closed connection");
+                    startActivity(new Intent(getApplicationContext(), Client.class));
                     close(); // ...закрываемся
 //                } else if (isFirstConnect) {
 //                    while (true) {
@@ -333,11 +344,6 @@ public class Client extends AppCompatActivity {
                 } else if (line.split("//////")[0].equals("\\\\maze_nom:")) {
                     Gson gson = new Gson();
                     if (gson.fromJson(line.split("//////")[1], MazeExample.class) != null) {
-                        try {
-                            clgotMaze.put(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                         isMazegot = true;
                         MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
                         Mazenom = MazeHolder.MazeArr.size() - 1;
@@ -351,12 +357,25 @@ public class Client extends AppCompatActivity {
                             ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
                             ed.apply();
                         }
+                        try {
+                            clgotMaze.put(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     } else {
+                        try {
+                            clgotMaze.put(0);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        isMultiplayer = false;
+                        isMazegot = false;
                         String message = "Unable to connect. Server is not fully set up?";
                         Message msg = Message.obtain(); // Creates an new Message instance
                         msg.obj = message; // Put the string into Message, into "obj" field.
 
                         hToaster.sendMessage(msg);
+                        close();
                     }
                 } else if (line.split("//////")[0].equals("\\\\amaze_nom:")) {
                     System.out.println("recive ama");
@@ -372,6 +391,51 @@ public class Client extends AppCompatActivity {
 
 
 
+    static class BroadcastingClient {
+        private static DatagramSocket socket = null;
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        public BroadcastingClient(String name, String type, String ipv4) throws IOException {
+            List<InetAddress> cl = listAllBroadcastAddresses();
+            for (InetAddress ad : cl) {
+                broadcast(type + "//////" + ipv4 + "//////" + name, ad);
+            }
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        List<InetAddress> listAllBroadcastAddresses() throws SocketException {
+            List<InetAddress> broadcastList = new ArrayList<>();
+            Enumeration<NetworkInterface> interfaces
+                    = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue;
+                }
+
+                networkInterface.getInterfaceAddresses().stream()
+                        .map(a -> a.getBroadcast())
+                        .filter(Objects::nonNull)
+                        .forEach(broadcastList::add);
+            }
+            return broadcastList;
+        }
+
+        public static void broadcast(
+                String broadcastMessage, InetAddress address) throws IOException {
+            socket = new DatagramSocket();
+            socket.setBroadcast(true);
+
+            byte[] buffer = broadcastMessage.getBytes();
+
+            DatagramPacket packet
+                    = new DatagramPacket(buffer, buffer.length, address, 4445);
+            socket.send(packet);
+            socket.close();
+        }
+    }
+
 
 
     private GestureDetector mDetector;
@@ -381,6 +445,8 @@ public class Client extends AppCompatActivity {
     }
 
     private int hasUsedKnife = 0;
+    private boolean broadcastNotInterrupted = true;
+
     private HashMap<View, Integer> maps = new HashMap<>();
     private HashSet<Integer> transitionLayouts = new HashSet<>();
     private HashMap<Integer, StartPage.TransperKey[]> transread = new HashMap<>();
@@ -451,6 +517,9 @@ public class Client extends AppCompatActivity {
         clgotMaze.clear();
         sendEvent.clear();
         gotBroadCast.clear();
+
+        LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+        sc.removeAllViews();
 
 
 
@@ -549,25 +618,27 @@ public class Client extends AppCompatActivity {
                     }
 
                     if (isMultiplayer && isServBase) {
+                        broadcastNotInterrupted = true;
+                        String n = "";
+                        if (findViewById(R.id.server_name) != null) {
+                            n = ((TextView) findViewById(R.id.server_name)).getText().toString();
+                        }
+                        if (n.length() < 1) {
+                            n = "Sever_mobile";
+                        }
+                        String finalN = n;
                         trBroad = new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                while (true) {
-                                    Intent servintent = new Intent("\\\\SERV");
-                                    String a = "";
-                                    if (findViewById(R.id.server_name) != null) {
-                                        a = ((TextView) findViewById(R.id.server_name)).getText().toString();
+                                while (broadcastNotInterrupted) {
+                                    try {
+                                        BroadcastingClient bc = new BroadcastingClient(finalN, "\\\\SERV", Utils.getIPAddress(true));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
                                     }
-                                    if (a.length() < 1) {
-                                        a = "Sever_mobile";
-                                    }
-                                    servintent.putExtra("name", a);
-                                    servintent.putExtra("ipv4", Utils.getIPAddress(true));
-                                    servintent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                                    sendBroadcast(servintent);
 
                                     try {
-                                        Thread.sleep(400);
+                                        Thread.sleep(5000);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
@@ -576,6 +647,8 @@ public class Client extends AppCompatActivity {
                         });
                         trBroad.start();
                         threadCatch.interrupt();
+                        echoServer.running = false;
+                        broadcastListening.interrupt();
                         predbannikAct();
                     }
                 }
@@ -594,16 +667,16 @@ public class Client extends AppCompatActivity {
                 if (findViewById(R.id.ServChooser) != null) {
                     LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
 
-                View[] a = new View[sc.getChildCount()];
-                for (int i = 0; i < sc.getChildCount(); i++) {
-                    a[i] = sc.getChildAt(i);
-                }
-
-                for (int i = 0; i < a.length; i++) {
-                    if (avalibleServers.get(((TextView) sc.getChildAt(i)).getText().toString().split(" ")[3]) == null) {
-                        sc.removeView(a[i]);
+                    View[] a = new View[sc.getChildCount()];
+                    for (int i = 0; i < sc.getChildCount(); i++) {
+                        a[i] = sc.getChildAt(i);
                     }
-                }
+
+                    for (View i : a) {
+                        if (avalibleServers.get(((TextView) i).getText().toString().split(" ")[3]) == null) {
+                            sc.removeView(i);
+                        }
+                    }
 
                     for (String i : avalibleServers.keySet()) {
                         if (sc.findViewWithTag(i) == null) {
@@ -634,6 +707,20 @@ public class Client extends AppCompatActivity {
             };
         };
 
+        broadcastListening = new Thread(null, new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void run() {
+                try {
+                    echoServer = new EchoServer();
+                    echoServer.start();
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        broadcastListening.start();
+
         threadCatch = new Thread(null, new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -659,6 +746,82 @@ public class Client extends AppCompatActivity {
                 } else {
                     SutdownServ.wantToDownload = false;
                 }
+            }
+        });
+
+        final Integer[] ch = {1};
+        findViewById(R.id.IP_write).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ch[0] == 1) {
+                    findViewById(R.id.IP_cont).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.IP_cont).setVisibility(View.GONE);
+                }
+                ch[0] = -ch[0];
+                findViewById(R.id.IP_con).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String IPv4 = ((TextView) findViewById(R.id.IP_text)).getText().toString();
+                        threadC = new Thread(null, new Runnable() {
+                            @RequiresApi(api = Build.VERSION_CODES.N)
+                            @Override
+                            public void run() {
+                                try {
+                                    runClient(IPv4, 8080); // Пробуем приконнетиться...
+                                } catch (IOException e) { // если объект не создан...
+                                    try {
+                                        clBlock.put(0);
+                                    } catch (InterruptedException e1) {
+                                        e1.printStackTrace();
+                                    }
+
+                                    System.out.println("Unable to connect. Server not running?"); // сообщаем...
+
+                                    String message = "Unable to connect. Server not running?";
+                                    Message msg = Message.obtain(); // Creates an new Message instance
+                                    msg.obj = message; // Put the string into Message, into "obj" field.
+
+                                    hToaster.sendMessage(msg);
+                                }
+                            }
+                        });
+                        threadC.start();
+
+
+                        try {
+                            clBlock.take();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (isMultiplayer) {
+                            try {
+                                sendEvent.put("ClientFirstCon");
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            Rmazeneed = true;
+                        }
+
+                        try {
+                            clgotMaze.take();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (isMultiplayer && isMazegot) {
+                            Maze.rand = Mazenom;
+                            threadCatch.interrupt();
+                            LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+                            sc.removeAllViews();
+                            echoServer.running = false;
+                            broadcastListening.interrupt();
+                            startPageAct();
+
+                        }
+                    }
+                });
             }
         });
 
@@ -691,45 +854,37 @@ public class Client extends AppCompatActivity {
                 });
                 threadC.start();
 
-                Integer a = null;
-                while (!isMultiplayer) {
-                    try {
-                        a = clBlock.take();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
 
-                    if (a == 0) {
-                        break;
-                    }
-
-                    if (isMultiplayer) {
-                        try {
-                            sendEvent.put("ClientFirstCon");
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Rmazeneed = true;
-                    }
+                try {
+                    clBlock.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
 
-
-                while (!isMazegot) {
-                    if (a == 0) {
-                        break;
-                    }
+                if (isMultiplayer) {
                     try {
-                        clgotMaze.take();
+                        sendEvent.put("ClientFirstCon");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    Rmazeneed = true;
+                }
 
-                    if (isMultiplayer && isMazegot) {
-                        Maze.rand = Mazenom;
-                        threadCatch.interrupt();
-                        startPageAct();
+                try {
+                    clgotMaze.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                    }
+                if (isMultiplayer && isMazegot) {
+                    Maze.rand = Mazenom;
+                    threadCatch.interrupt();
+                    LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+                    sc.removeAllViews();
+                    echoServer.running = false;
+                    broadcastListening.interrupt();
+                    startPageAct();
+
                 }
             }
         });
@@ -738,6 +893,11 @@ public class Client extends AppCompatActivity {
 
     private void runServer_clientStartpage() {
         if (isServBase && Predban) {
+            try {
+                sendEvent.put("ServHoldFirstCon");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             try {
                 Thread.sleep(1000);
@@ -792,19 +952,21 @@ public class Client extends AppCompatActivity {
     }
 
     private void BroadcastExchange() {
+        broadcastNotInterrupted = false;
         trBroad.interrupt();
         trBroad1 = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void run() {
-                for (int i = 0; i < 100; i++) {
-                    Intent servintent = new Intent("\\\\SERVDIED");
-                    servintent.putExtra("name", "nm");
-                    servintent.putExtra("ipv4", Utils.getIPAddress(true));
-                    servintent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                    sendBroadcast(servintent);
+                for (int i = 0; i < 5; i++) {
+                    try {
+                        BroadcastingClient bc = new BroadcastingClient("a", "\\\\DIED", Utils.getIPAddress(true));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     try {
-                        Thread.sleep(400);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -911,11 +1073,6 @@ public class Client extends AppCompatActivity {
                 }
                 Predban = true;
                 ServnotgotMazenom = true;
-                try {
-                    sendEvent.put("ServHoldFirstCon");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 runServer_clientStartpage();
             }
@@ -929,6 +1086,7 @@ public class Client extends AppCompatActivity {
                     Maze.rand = chmap;
                     Predban = true;
                     ServnotgotMazenom = true;
+
 
                     runServer_clientStartpage();
                 }
