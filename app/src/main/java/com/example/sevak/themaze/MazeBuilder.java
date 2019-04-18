@@ -61,6 +61,9 @@ public class MazeBuilder extends AppCompatActivity {
         findViewById(R.id.rev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                EditMazeHolder.enterMaze = new Integer[][] {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+                EditMazeHolder.MarNum = -1;
+                EditMazeHolder.bs = null;
                 startActivity(new Intent(getApplicationContext(), EditMapShlus.class));
             }
         });
@@ -68,7 +71,7 @@ public class MazeBuilder extends AppCompatActivity {
         findViewById(R.id.TheBegin).getBackground().setAlpha(255);
         int Cellsize = (int) ConvDPtoPX(41);
 
-        BC = new int[] {1, 1};
+        BC = new int[] {-1, -1};
 
         for (int i = 0; i < TMaze.length; i++) {
             for (int j = 0; j < TMaze[0].length; j++) {
@@ -551,16 +554,14 @@ public class MazeBuilder extends AppCompatActivity {
                 final RelativeLayout relativeLayout = new RelativeLayout(this);
                 ImageView imageView = new ImageView(this);
                 imageView.setImageResource(R.drawable.walls0);
+                imageView.setTag("imv");
                 relativeLayout.addView(imageView);
                 relativeLayout.setTag(i + " " + j);
                 relativeLayout.setClickable(true);
                 relativeLayout.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if (relativeLayout.isClickable()) {
-                            mDetector.onTouchEvent(motionEvent);
-                            thisView = relativeLayout;
-                        }
+                        selectCell(motionEvent, relativeLayout);
                         return true;
                     }
                 });
@@ -790,7 +791,7 @@ public class MazeBuilder extends AppCompatActivity {
                 }
                 case 9: {
                     if (IamPlaced) {
-                        BC = new int[]{0, 0};
+                        BC = new int[]{-1, -1};
                         thisView.removeView(thisView.findViewWithTag(String.valueOf(finalI)));
                         IamPlaced = false;
                     }
@@ -997,16 +998,14 @@ public class MazeBuilder extends AppCompatActivity {
             final RelativeLayout relativeLayout = new RelativeLayout(this);
             ImageView imageView = new ImageView(this);
             imageView.setImageResource(R.drawable.walls0);
+            imageView.setTag("imv");
             relativeLayout.addView(imageView);
             relativeLayout.setTag((Integer.parseInt(hc.getText().toString()) - 1) + " " + String.valueOf(i));
             relativeLayout.setClickable(true);
             relativeLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (relativeLayout.isClickable()) {
-                        mDetector.onTouchEvent(motionEvent);
-                        thisView = relativeLayout;
-                    }
+                    selectCell(motionEvent, relativeLayout);
                     return true;
                 }
             });
@@ -1026,16 +1025,14 @@ public class MazeBuilder extends AppCompatActivity {
             final RelativeLayout relativeLayout = new RelativeLayout(this);
             ImageView imageView = new ImageView(this);
             imageView.setImageResource(R.drawable.walls0);
+            imageView.setTag("imv");
             relativeLayout.addView(imageView);
             relativeLayout.setTag(String.valueOf(i) + " " + (Integer.parseInt(wc.getText().toString()) - 1));
             relativeLayout.setClickable(true);
             relativeLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (relativeLayout.isClickable()) {
-                        mDetector.onTouchEvent(motionEvent);
-                        thisView = relativeLayout;
-                    }
+                    selectCell(motionEvent, relativeLayout);
                     return true;
                 }
             });
@@ -1044,6 +1041,17 @@ public class MazeBuilder extends AppCompatActivity {
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
             rules.setMargins(OFFSET_LEFT +Cellsize * (Integer.parseInt(wc.getText().toString()) - 1), OFFSET_TOP +Cellsize * i, 100, 100);
             layout.addView(relativeLayout, rules);
+        }
+    }
+
+    private void selectCell(MotionEvent motionEvent, RelativeLayout relativeLayout) {
+        if (relativeLayout.isClickable()) {
+            mDetector.onTouchEvent(motionEvent);
+            if (thisView != null){
+                ((ImageView) ((RelativeLayout) thisView).findViewWithTag("imv")).setImageResource(R.drawable.walls0);
+            }
+            thisView = relativeLayout;
+            ((ImageView) ((RelativeLayout) thisView).findViewWithTag("imv")).setImageResource(R.drawable.walls0selected);
         }
     }
 

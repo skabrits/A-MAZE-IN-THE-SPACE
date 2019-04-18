@@ -321,6 +321,13 @@ public class Client extends AppCompatActivity {
 //                    }
                 } else if (line.split("//////")[0].equals("\\\\your_turn:")) {
                     System.out.println("recive turn");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast t = Toast.makeText(getApplicationContext(), "Your turn", Toast.LENGTH_SHORT);
+                            t.show();
+                        }
+                    });
                     isMyTurn = true;
                     isSent = false;
                     if (hasUsedKnife != 0) {
@@ -344,7 +351,6 @@ public class Client extends AppCompatActivity {
                 } else if (line.split("//////")[0].equals("\\\\maze_nom:")) {
                     Gson gson = new Gson();
                     if (gson.fromJson(line.split("//////")[1], MazeExample.class) != null) {
-                        isMazegot = true;
                         MazeHolder.MazeArr.add(gson.fromJson(line.split("//////")[1], MazeExample.class));
                         Mazenom = MazeHolder.MazeArr.size() - 1;
                         System.out.println("recive mazn");
@@ -357,6 +363,7 @@ public class Client extends AppCompatActivity {
                             ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
                             ed.apply();
                         }
+                        isMazegot = true;
                         try {
                             clgotMaze.put(1);
                         } catch (InterruptedException e) {
@@ -646,8 +653,10 @@ public class Client extends AppCompatActivity {
                             }
                         });
                         trBroad.start();
-                        threadCatch.interrupt();
-                        echoServer.running = false;
+                        if (echoServer != null) {
+                            echoServer.running = false;
+                            echoServer.interrupt();
+                        }
                         broadcastListening.interrupt();
                         predbannikAct();
                     }
@@ -683,9 +692,7 @@ public class Client extends AppCompatActivity {
                             TextView txt = new TextView(getApplicationContext());
                             txt.setTag(i);
                             txt.setText("NAME: " + avalibleServers.get(i) + ", IP: " + i);
-                            txt.setTextSize(25);
-                            txt.setPadding(50, 20, 10, 10);
-                            txt.setTextColor(Color.GREEN);
+                            ColorHolder.CHOOSE_VIEW_CUSTOMIZE(txt);
                             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -694,10 +701,10 @@ public class Client extends AppCompatActivity {
                                 @Override
                                 public void onClick(View view) {
                                     if (currentTextViewServ != null) {
-                                        currentTextViewServ.setTextColor(Color.GREEN);
+                                        currentTextViewServ.setTextColor(ColorHolder.CHOOSER_LIST);
                                     }
                                     chsrv = i;
-                                    txt.setTextColor(Color.YELLOW);
+                                    txt.setTextColor(ColorHolder.CHOOSER_LIST_SELECTED);
                                     currentTextViewServ = txt;
                                 }
                             });
@@ -755,71 +762,19 @@ public class Client extends AppCompatActivity {
             public void onClick(View v) {
                 if (ch[0] == 1) {
                     findViewById(R.id.IP_cont).setVisibility(View.VISIBLE);
+                    findViewById(R.id.Connect_to_Server).setVisibility(View.GONE);
+                    ((ImageView) v).setImageResource(R.drawable.minus);
                 } else {
                     findViewById(R.id.IP_cont).setVisibility(View.GONE);
+                    findViewById(R.id.Connect_to_Server).setVisibility(View.VISIBLE);
+                    ((ImageView) v).setImageResource(android.R.drawable.ic_input_add);
                 }
                 ch[0] = -ch[0];
                 findViewById(R.id.IP_con).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         String IPv4 = ((TextView) findViewById(R.id.IP_text)).getText().toString();
-                        threadC = new Thread(null, new Runnable() {
-                            @RequiresApi(api = Build.VERSION_CODES.N)
-                            @Override
-                            public void run() {
-                                try {
-                                    runClient(IPv4, 8080); // Пробуем приконнетиться...
-                                } catch (IOException e) { // если объект не создан...
-                                    try {
-                                        clBlock.put(0);
-                                    } catch (InterruptedException e1) {
-                                        e1.printStackTrace();
-                                    }
-
-                                    System.out.println("Unable to connect. Server not running?"); // сообщаем...
-
-                                    String message = "Unable to connect. Server not running?";
-                                    Message msg = Message.obtain(); // Creates an new Message instance
-                                    msg.obj = message; // Put the string into Message, into "obj" field.
-
-                                    hToaster.sendMessage(msg);
-                                }
-                            }
-                        });
-                        threadC.start();
-
-
-                        try {
-                            clBlock.take();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        if (isMultiplayer) {
-                            try {
-                                sendEvent.put("ClientFirstCon");
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            Rmazeneed = true;
-                        }
-
-                        try {
-                            clgotMaze.take();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        if (isMultiplayer && isMazegot) {
-                            Maze.rand = Mazenom;
-                            threadCatch.interrupt();
-                            LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
-                            sc.removeAllViews();
-                            echoServer.running = false;
-                            broadcastListening.interrupt();
-                            startPageAct();
-
-                        }
+                        prepareMultiShlus(IPv4);
                     }
                 });
             }
@@ -828,67 +783,82 @@ public class Client extends AppCompatActivity {
         findViewById(R.id.Connect_to_Server).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                threadC = new Thread(null, new Runnable() {
-                    @RequiresApi(api = Build.VERSION_CODES.N)
-                    @Override
-                    public void run() {
-
-                        try {
-                            runClient(chsrv, 8080); // Пробуем приконнетиться...
-                        } catch (IOException e) { // если объект не создан...
-                            try {
-                                clBlock.put(0);
-                            } catch (InterruptedException e1) {
-                                e1.printStackTrace();
-                            }
-
-                            System.out.println("Unable to connect. Server not running?"); // сообщаем...
-
-                            String message = "Unable to connect. Server not running?";
-                            Message msg = Message.obtain(); // Creates an new Message instance
-                            msg.obj = message; // Put the string into Message, into "obj" field.
-
-                            hToaster.sendMessage(msg);
-                        }
-                    }
-                });
-                threadC.start();
-
-
-                try {
-                    clBlock.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (isMultiplayer) {
-                    try {
-                        sendEvent.put("ClientFirstCon");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Rmazeneed = true;
-                }
-
-                try {
-                    clgotMaze.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (isMultiplayer && isMazegot) {
-                    Maze.rand = Mazenom;
-                    threadCatch.interrupt();
-                    LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
-                    sc.removeAllViews();
-                    echoServer.running = false;
-                    broadcastListening.interrupt();
-                    startPageAct();
-
-                }
+                prepareMultiShlus(chsrv);
             }
         });
 
+    }
+
+    private void prepareMultiShlus(String IP) {
+        threadC = new Thread(null, new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void run() {
+                try {
+                    runClient(IP, 8080); // Пробуем приконнетиться...
+                } catch (IOException e) { // если объект не создан...
+                    try {
+                        clBlock.put(0);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+
+                    System.out.println("Unable to connect. Server not running?"); // сообщаем...
+
+                    String message = "Unable to connect. Server not running?";
+                    Message msg = Message.obtain(); // Creates an new Message instance
+                    msg.obj = message; // Put the string into Message, into "obj" field.
+
+                    hToaster.sendMessage(msg);
+                }
+            }
+        });
+        threadC.start();
+
+
+        Integer a = 1;
+        try {
+            a = clBlock.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (a == 0) {
+            try {
+                clgotMaze.put(0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (isMultiplayer) {
+            try {
+                sendEvent.put("ClientFirstCon");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Rmazeneed = true;
+        }
+
+        try {
+            clgotMaze.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (isMultiplayer && isMazegot) {
+            Maze.rand = Mazenom;
+            threadCatch.interrupt();
+            LinearLayout sc = (LinearLayout) findViewById(R.id.ServChooser);
+            sc.removeAllViews();
+            if (echoServer != null) {
+                echoServer.running = false;
+                echoServer.interrupt();
+            }
+            broadcastListening.interrupt();
+            startPageAct();
+
+        }
     }
 
     private void runServer_clientStartpage() {
@@ -1009,9 +979,7 @@ public class Client extends AppCompatActivity {
             TextView txt = new TextView(getApplicationContext());
             txt.setTag(i);
             txt.setText(MazeHolder.MazeArr.get(i).name);
-            txt.setTextSize(25);
-            txt.setPadding(50, 20, 10, 10);
-            txt.setTextColor(Color.GREEN);
+            ColorHolder.CHOOSE_VIEW_CUSTOMIZE(txt);
             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -1021,10 +989,10 @@ public class Client extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if(currentTextView != null) {
-                        currentTextView.setTextColor(Color.GREEN);
+                        currentTextView.setTextColor(ColorHolder.CHOOSER_LIST);
                     }
                     chmap = finalI;
-                    txt.setTextColor(Color.YELLOW);
+                    txt.setTextColor(ColorHolder.CHOOSER_LIST_SELECTED);
                     currentTextView = txt;
                 }
             });
@@ -1728,7 +1696,7 @@ public class Client extends AppCompatActivity {
         boolean b = false;
         switch (side){
             case 1: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] = 0;
                 } else {
@@ -1742,7 +1710,7 @@ public class Client extends AppCompatActivity {
                 break;
             }
             case 10: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] = 0;
                 } else {
@@ -1756,7 +1724,7 @@ public class Client extends AppCompatActivity {
                 break;
             }
             case 100: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] = 0;
                 } else {
@@ -1770,7 +1738,7 @@ public class Client extends AppCompatActivity {
                 break;
             }
             case 1000: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] = 0;
                 } else {

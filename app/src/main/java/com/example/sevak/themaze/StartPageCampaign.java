@@ -648,7 +648,7 @@ public class StartPageCampaign extends AppCompatActivity {
         boolean b = false;
         switch (side){
             case 1: {
-                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] != 0) {
+                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] != 0) {
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] = 0;
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] = 0;
                 } else {
@@ -662,7 +662,7 @@ public class StartPageCampaign extends AppCompatActivity {
                 break;
             }
             case 10: {
-                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] != 0) {
+                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] != 0) {
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] = 0;
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] = 0;
                 } else {
@@ -676,7 +676,7 @@ public class StartPageCampaign extends AppCompatActivity {
                 break;
             }
             case 100: {
-                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] != 0) {
+                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] != 0) {
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] = 0;
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] = 0;
                 } else {
@@ -690,7 +690,7 @@ public class StartPageCampaign extends AppCompatActivity {
                 break;
             }
             case 1000: {
-                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] != 0) {
+                if (MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] != 0) {
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] = 0;
                     MazeCampaign.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] = 0;
                 } else {

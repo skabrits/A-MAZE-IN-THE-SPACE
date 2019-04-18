@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <item name="Me" type="id"></item>
     <item name="Mec" type="id"></item>
     <item name="p2" type="id"></item>
@@ -62,4 +62,150 @@
     <item name="p29l" type="id"></item>
     <item name="p30l" type="id"></item>
     <item name="p31l" type="id"></item>
+
+    <string-array name="Pmodes">
+        <item>Singleplayer</item>
+        <item>Multiplayer</item>
+        <item>Cooperation</item>
+    </string-array>
+
+    <array name="DelAdd">
+        <item><ImageView
+            android:id="@+id/delwall1uppr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/wall1uppr"
+            android:tag="@drawable/wall1uppr"/></item>
+        <item><ImageView
+            android:id="@+id/delwall1downpr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/wall1downpr"
+            android:tag="@drawable/wall1downpr"/></item>
+        <item><ImageView
+            android:id="@+id/delriverleft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/riverleft"
+            android:tag="@drawable/riverleft"/></item>
+        <item><ImageView
+            android:id="@+id/delriverdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/riverdown"
+            android:tag="@drawable/riverdown"/></item>
+        <item><ImageView
+            android:id="@+id/delriverright"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/riverright"
+            android:tag="@drawable/riverright"/></item>
+        <item><ImageView
+            android:id="@+id/delriverup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/riverup"
+            android:tag="@drawable/riverup"/></item>
+        <item><ImageView
+            android:id="@+id/delwall1leftpr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/wall1leftpr"
+            android:tag="@drawable/wall1leftpr"/></item>
+        <item><ImageView
+            android:id="@+id/delwall1rightpr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/wall1rightpr"
+            android:tag="@drawable/wall1rightpr"/></item>
+        <item><ImageView
+            android:id="@+id/delteleport1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/teleport1"
+            android:tag="@drawable/teleport1"/></item>
+        <item><ImageView
+            android:id="@+id/delme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/milkiipidoras"
+            android:tag="@drawable/milkiipidoras"/></item>
+        <item><ImageView
+            android:id="@+id/delexitup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/exitup"
+            android:tag="@drawable/exitup"/></item>
+        <item><ImageView
+            android:id="@+id/delexitright"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/exitright"
+            android:tag="@drawable/exitright"/></item>
+        <item><ImageView
+            android:id="@+id/delexitdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/exitdown"
+            android:tag="@drawable/exitdown"/></item>
+        <item><ImageView
+            android:id="@+id/delexitleft"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/exitleft"
+            android:tag="@drawable/exitleft"/></item>
+        <item><ImageView
+            android:id="@+id/delminotaur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/minotavr"
+            android:tag="@drawable/minotavr"/></item>
+        <item><ImageView
+            android:id="@+id/delhospital"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/hospital"
+            android:tag="@drawable/hospital"/></item>
+        <item><ImageView
+            android:id="@+id/delbfg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/bfg"
+            android:tag="@drawable/bfg"/></item>
+        <item><ImageView
+            android:id="@+id/delbullet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/bullet"
+            android:tag="@drawable/bullet"/></item>
+        <item><ImageView
+            android:id="@+id/delkey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/key"
+            android:tag="@drawable/key"/></item>
+    </array>
+
+    <string-array name="IV_HOlDER">
+        <item>@drawable/wall1uppr</item>
+        <item>@drawable/wall1downpr</item>
+        <item>@drawable/riverleft</item>
+        <item>@drawable/riverdown</item>
+        <item>@drawable/riverright</item>
+        <item>@drawable/riverup</item>
+        <item>@drawable/wall1leftpr</item>
+        <item>@drawable/wall1rightpr</item>
+        <item>@drawable/teleport1</item>
+        <item>@drawable/milkiipidoras</item>
+        <item>@drawable/exitup</item>
+        <item>@drawable/exitright</item>
+        <item>@drawable/exitdown</item>
+        <item>@drawable/exitleft</item>
+        <item>@drawable/minotavr</item>
+        <item>@drawable/hospital</item>
+        <item>@drawable/bfg</item>
+        <item>@drawable/bullet</item>
+        <item>@drawable/key</item>
+    </string-array>
+
 </resources>

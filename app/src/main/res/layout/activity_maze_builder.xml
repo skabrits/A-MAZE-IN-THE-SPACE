@@ -32,97 +32,100 @@
 
                 <RelativeLayout
                     android:id="@+id/workspace"
-                    android:minHeight="600dp"
-                    android:minWidth="390dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
                     android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
+                    android:minWidth="390dp"
+                    android:minHeight="600dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/HArL"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="50dp"
                         android:layout_marginLeft="60dp"
+                        android:layout_marginTop="50dp"
                         app:srcCompat="@drawable/arrow_left" />
 
                     <ImageView
                         android:id="@+id/HArR"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="50dp"
                         android:layout_marginLeft="100dp"
+                        android:layout_marginTop="50dp"
                         app:srcCompat="@drawable/arrow_right" />
 
                     <TextView
                         android:id="@+id/HCounter"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginTop="48dp"
                         android:layout_marginLeft="80dp"
+                        android:layout_marginTop="48dp"
                         android:text="1"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18dp"/>
+                        android:textSize="18dp" />
 
                     <TextView
+                        android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="20dp"
-                        android:layout_marginTop="48dp"
                         android:layout_marginLeft="5dp"
+                        android:layout_marginTop="48dp"
                         android:text="Height"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18dp"
-                        android:id="@+id/textView3" />
+                        android:textSize="18dp" />
 
                     <ImageView
                         android:id="@+id/WArL"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginLeft="60dp"
+                        android:layout_marginTop="20dp"
                         app:srcCompat="@drawable/arrow_left" />
 
                     <ImageView
                         android:id="@+id/WArR"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
                         android:layout_marginLeft="100dp"
+                        android:layout_marginTop="20dp"
                         app:srcCompat="@drawable/arrow_right" />
 
                     <TextView
                         android:id="@+id/WCounter"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginTop="18dp"
                         android:layout_marginLeft="80dp"
+                        android:layout_marginTop="18dp"
                         android:text="1"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18dp"/>
+                        android:textSize="18dp" />
 
                     <TextView
+                        android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="20dp"
-                        android:layout_marginTop="18dp"
                         android:layout_marginLeft="7dp"
+                        android:layout_marginTop="18dp"
                         android:text="Width"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
-                        android:textSize="18dp"
-                        android:id="@+id/textView2" />
+                        android:textSize="18dp" />
 
                     <LinearLayout
-                        android:layout_width="match_parent"
                         android:id="@+id/AddNEWView"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:visibility="gone"
                         android:layout_marginTop="140dp"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/addwall1uppr"
@@ -241,127 +244,127 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
                         android:id="@+id/DelAView"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:visibility="gone"
                         android:layout_marginLeft="50dp"
                         android:layout_marginTop="140dp"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
-                    <ImageView
-                        android:id="@+id/delwall1uppr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/wall1uppr" />
+                        <ImageView
+                            android:id="@+id/delwall1uppr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/wall1uppr_delete" />
 
-                    <ImageView
-                        android:id="@+id/delwall1downpr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/wall1downpr" />
+                        <ImageView
+                            android:id="@+id/delwall1downpr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/wall1downpr_delete" />
 
-                    <ImageView
-                        android:id="@+id/delriverleft"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/riverleft" />
+                        <ImageView
+                            android:id="@+id/delriverleft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/riverleft_delete" />
 
-                    <ImageView
-                        android:id="@+id/delriverdown"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/riverdown" />
+                        <ImageView
+                            android:id="@+id/delriverdown"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/riverdown_delete" />
 
-                    <ImageView
-                        android:id="@+id/delriverright"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/riverright" />
+                        <ImageView
+                            android:id="@+id/delriverright"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/riverright_delete" />
 
-                    <ImageView
-                        android:id="@+id/delriverup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/riverup" />
+                        <ImageView
+                            android:id="@+id/delriverup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/riverup_delete" />
 
-                    <ImageView
-                        android:id="@+id/delwall1leftpr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/wall1leftpr" />
+                        <ImageView
+                            android:id="@+id/delwall1leftpr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/wall1leftpr_delete" />
 
-                    <ImageView
-                        android:id="@+id/delwall1rightpr"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/wall1rightpr" />
+                        <ImageView
+                            android:id="@+id/delwall1rightpr"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/wall1rightpr_delete" />
 
-                    <ImageView
-                        android:id="@+id/delteleport1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/teleport1" />
+                        <ImageView
+                            android:id="@+id/delteleport1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/teleport1_delete" />
 
                         <ImageView
                             android:id="@+id/delme"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/milkiipidoras" />
+                            app:srcCompat="@drawable/milkiipidoras_delete" />
 
                         <ImageView
                             android:id="@+id/delexitup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/exitup" />
+                            app:srcCompat="@drawable/exitup_delete" />
 
                         <ImageView
                             android:id="@+id/delexitright"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/exitright" />
+                            app:srcCompat="@drawable/exitright_delete" />
 
                         <ImageView
                             android:id="@+id/delexitdown"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/exitdown" />
+                            app:srcCompat="@drawable/exitdown_delete" />
 
                         <ImageView
                             android:id="@+id/delexitleft"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/exitleft" />
+                            app:srcCompat="@drawable/exitleft_delete" />
 
                         <ImageView
                             android:id="@+id/delminotaur"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/minotavr" />
+                            app:srcCompat="@drawable/minotavr_delete" />
 
                         <ImageView
                             android:id="@+id/delhospital"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/hospital" />
+                            app:srcCompat="@drawable/hospital_delete" />
 
                         <ImageView
                             android:id="@+id/delbfg"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/bfg" />
+                            app:srcCompat="@drawable/bfg_delete" />
 
                         <ImageView
                             android:id="@+id/delbullet"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/bullet" />
+                            app:srcCompat="@drawable/bullet_delete" />
 
                         <ImageView
                             android:id="@+id/delkey"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:srcCompat="@drawable/key" />
+                            app:srcCompat="@drawable/key_delete" />
 
                     </LinearLayout>
 
@@ -373,7 +376,7 @@
                         android:layout_alignRight="@+id/HCounter"
                         android:layout_marginTop="80dp"
                         android:text="Cancel"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/end"

@@ -686,7 +686,7 @@ public class StartPage extends AppCompatActivity {
         boolean b = false;
         switch (side){
             case 1: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] - 1][cord[1]] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] - 2][cord[1]] = 0;
                 } else {
@@ -700,7 +700,7 @@ public class StartPage extends AppCompatActivity {
                 break;
             }
             case 10: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 1] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] + 2] = 0;
                 } else {
@@ -714,7 +714,7 @@ public class StartPage extends AppCompatActivity {
                 break;
             }
             case 100: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] + 1][cord[1]] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0] + 2][cord[1]] = 0;
                 } else {
@@ -728,7 +728,7 @@ public class StartPage extends AppCompatActivity {
                 break;
             }
             case 1000: {
-                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] != 0) {
+                if (Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] != 0) {
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 1] = 0;
                     Maze.YourMazesholder.get(NativeLayout)[cord[0]][cord[1] - 2] = 0;
                 } else {

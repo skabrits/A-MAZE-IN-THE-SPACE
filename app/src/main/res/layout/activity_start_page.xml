@@ -8,6 +8,15 @@
     android:background="@android:color/holo_green_dark"
     tools:context="com.example.sevak.themaze.StartPage">
 
+    <TextView
+        android:id="@+id/textView59"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Go: Dbl Tap direction\nShoot: Long press direction\nKnife strike: Hold current location"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <ImageView
         android:id="@+id/Trash_Can"
         android:layout_width="wrap_content"
@@ -87,6 +96,8 @@
                     android:minWidth="368dp"
                     android:minHeight="443dp"
                     android:tag="p0ln"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <RelativeLayout

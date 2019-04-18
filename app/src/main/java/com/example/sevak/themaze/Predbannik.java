@@ -80,58 +80,58 @@ public class Predbannik extends AppCompatActivity {
         mc.removeAllViews();
 
         for (int i = 0; i < MazeHolder.MazeArr.size(); i++) {
-            TextView txt = new TextView(this);
-            txt.setTag(i);
-            txt.setText(MazeHolder.MazeArr.get(i).name);
-            txt.setTextSize(25);
-            txt.setPadding(50, 20, 10, 10);
-            txt.setTextColor(Color.GREEN);
-            RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT);
-            mc.addView(txt, rules);
-            int finalI = i;
-            txt.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(currentTextView != null) {
-                        currentTextView.setTextColor(Color.GREEN);
+            if (MazeHolder.MazeArr.get(i).PlayerType.equals("Single")) {
+                TextView txt = new TextView(this);
+                txt.setTag(i);
+                txt.setText(MazeHolder.MazeArr.get(i).name);
+                ColorHolder.CHOOSE_VIEW_CUSTOMIZE(txt);
+                RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                mc.addView(txt, rules);
+                int finalI = i;
+                txt.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (currentTextView != null) {
+                            currentTextView.setTextColor(ColorHolder.CHOOSER_LIST);
+                        }
+                        chmap = finalI;
+                        txt.setTextColor(ColorHolder.CHOOSER_LIST_SELECTED);
+                        currentTextView = txt;
                     }
-                    chmap = finalI;
-                    txt.setTextColor(Color.YELLOW);
-                    currentTextView = txt;
-                }
-            });
+                });
 
-            ImageView txtdel = new ImageView(this);
-            txtdel.setImageResource(getResources().getIdentifier("android:drawable/ic_menu_delete", null, null));
-            txtdel.setPadding(10, 10, 50, 20);
-            RelativeLayout.LayoutParams rules1 = new RelativeLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT);
-            mc.addView(txtdel, rules1);
-            int finalI1 = i;
-            txtdel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    deleteMap();
-                }
+                ImageView txtdel = new ImageView(this);
+                txtdel.setImageResource(getResources().getIdentifier("android:drawable/ic_menu_delete", null, null));
+                txtdel.setPadding(10, 10, 50, 20);
+                RelativeLayout.LayoutParams rules1 = new RelativeLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT);
+                mc.addView(txtdel, rules1);
+                int finalI1 = i;
+                txtdel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        deleteMap();
+                    }
 
-                private void deleteMap() {
-                    Toast t = Toast.makeText(getApplicationContext(), "A maze " + MazeHolder.MazeArr.get(finalI1).name + " has been deleted", Toast.LENGTH_SHORT);
-                    t.show();
-                    Gson gson = new Gson();
-                    TextView txt = new TextView(getApplicationContext());
-                    txt = (TextView) mc.findViewWithTag(finalI1);
-                    mc.removeView(txt);
-                    SharedPreferences sharedPreferences = getSharedPreferences("mazehold", MODE_PRIVATE);
-                    SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
-                    MazeHolder.MazeArr.remove(finalI1);
-                    ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
-                    ed.apply();
-                    mc.removeView(txtdel);
-                }
-            });
+                    private void deleteMap() {
+                        Toast t = Toast.makeText(getApplicationContext(), "A maze " + MazeHolder.MazeArr.get(finalI1).name + " has been deleted", Toast.LENGTH_SHORT);
+                        t.show();
+                        Gson gson = new Gson();
+                        TextView txt = new TextView(getApplicationContext());
+                        txt = (TextView) mc.findViewWithTag(finalI1);
+                        mc.removeView(txt);
+                        SharedPreferences sharedPreferences = getSharedPreferences("mazehold", MODE_PRIVATE);
+                        SharedPreferences.Editor ed = sharedPreferencesForMholder.edit();
+                        MazeHolder.MazeArr.remove(finalI1);
+                        ed.putString("mazehold", gson.toJson(MazeHolder.MazeArr));
+                        ed.apply();
+                        mc.removeView(txtdel);
+                    }
+                });
+            }
         }
     }
 }

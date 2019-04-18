@@ -87,6 +87,8 @@
                     android:minWidth="368dp"
                     android:minHeight="443dp"
                     android:tag="p0ln"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <RelativeLayout
@@ -113,16 +115,12 @@
 
                 <RelativeLayout
                     android:id="@+id/p1l"
-                    android:tag="p1ln"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="100dp"
-                    android:layout_marginTop="100dp"
-                    android:layout_marginRight="100dp"
-                    android:layout_marginBottom="100dp"
                     android:background="@android:color/holo_green_light"
                     android:minWidth="387dp"
                     android:minHeight="500dp"
+                    android:tag="p1ln"
                     android:visibility="gone">
 
                     <ImageView
@@ -151,6 +149,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_menu_revert" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Go: Dbl Tap direction\nShoot: Long press direction\nKnife strike: Hold current location"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -49,9 +49,7 @@ public class EditorChooser extends AppCompatActivity {
             TextView txt = new TextView(this);
             txt.setTag(MazeHolder.MazeArr.get(i).name);
             txt.setText(MazeHolder.MazeArr.get(i).name);
-            txt.setTextSize(25);
-            txt.setPadding(50, 20, 10, 10);
-            txt.setTextColor(Color.GREEN);
+            ColorHolder.CHOOSE_VIEW_CUSTOMIZE(txt);
             RelativeLayout.LayoutParams rules = new RelativeLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -61,10 +59,10 @@ public class EditorChooser extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if(currentTextView != null) {
-                        currentTextView.setTextColor(Color.GREEN);
+                        currentTextView.setTextColor(ColorHolder.CHOOSER_LIST);
                     }
                     chmap = finalI;
-                    txt.setTextColor(Color.YELLOW);
+                    txt.setTextColor(ColorHolder.CHOOSER_LIST_SELECTED);
                     currentTextView = txt;
                 }
             });
